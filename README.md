@@ -19,8 +19,8 @@
 <p align="center">
   <a href="#the-island">The island</a> ·
   <a href="#the-bar">The bar</a> ·
+  <a href="#the-launcher-and-the-dock">The launcher</a> ·
   <a href="#the-desktop">The desktop</a> ·
-  <a href="#one-palette-everywhere">The palette</a> ·
   <a href="#installation">Installation</a> ·
   <a href="#keys">Keys</a>
 </p>
@@ -65,17 +65,19 @@ all inside one capsule. Each shows its symbol or its ring, with its figure
 always, never or under the pointer — two settings for the whole bar, and any
 piece can have a look of its own.
 
-## The launcher
+## The launcher and the dock
 
 <p align="center">
-  <img src=".github/assets/launcher.jpg" alt="The launcher in six modes: the applications ranked, a search, a sum, the shell's own places under the > sigil, a countdown, and the clipboard history with an image drawn in its row" width="100%">
+  <img src=".github/assets/launcher-and-dock.jpg" alt="The launcher listing applications ranked by use, the clipboard history with an image drawn in its row, and the dock with the terminal's menu open over its windows" width="100%">
 </p>
 
 **The first character says what the field is for.** Plain text searches
 applications, `=` calculates, `@` finds an open window, `!` starts a countdown,
 `'` is the clipboard history, and `>` is the shell itself — every panel and
-setting by name. Applications are ranked by what you actually launch, with the
-dock's favourites first.
+setting by name. Applications are ranked by what you actually launch.
+
+**The dock holds what you pinned, then whatever else is open**, and the same
+pins come first in the launcher. Right-click an icon for its windows by name.
 
 ## The desktop
 
@@ -93,6 +95,19 @@ opens that widget's own look.
 wall calendar, a record that turns while it plays, an hourglass. The theme is
 one setting for the desk and a choice per widget.
 
+<p align="center">
+  <img src=".github/assets/repaint.gif" alt="The wallpaper changing three times, and the bar, the widgets, the terminal and the system monitor repainting with each one" width="100%">
+</p>
+
+**The palette comes out of the painting.** Pick a wallpaper and its colours
+reach everything at once: the island and the widgets, the terminal and the
+prompt, btop, cava, yazi, neovim, VSCodium, the GTK, Qt and KDE windows, Thunar
+down to its folders, Vesktop, Zen and Spotify. Or pick one of nine palettes
+instead. The desk comes with forty paintings, in the style it is named after.
+
+In the terminal, the prompt is laid out like the bar, and `fa` greets you with
+fastfetch beside an animated scene drawn in pixel art out of the palette.
+
 ## Notes and tasks
 
 <p align="center">
@@ -107,21 +122,6 @@ with others along an edge as tabs that peek out under the pointer.
 cards dragged between the lanes, and a task's day shows as a dot under the
 month wherever a month is drawn.
 
-## One palette, everywhere
-
-<p align="center">
-  <img src=".github/assets/repaint.gif" alt="The wallpaper changing three times, and the bar, the widgets, the terminal and the system monitor repainting with each one" width="100%">
-</p>
-
-**The palette comes out of the painting.** Pick a wallpaper and its colours
-reach everything at once: the island and the widgets, the terminal and the
-prompt, btop, cava, yazi, neovim, VSCodium, the GTK, Qt and KDE windows, Thunar
-down to its folders, Vesktop, Zen and Spotify. Or pick one of nine palettes
-instead. The desk comes with forty paintings, in the style it is named after.
-
-In the terminal, the prompt is laid out like the bar, and `fa` greets you with
-fastfetch beside an animated scene drawn in pixel art out of the palette.
-
 ## Lock and login
 
 <p align="center">
@@ -135,7 +135,7 @@ clock, the same face and the same field.
 ## Settings
 
 <p align="center">
-  <img src=".github/assets/settings.jpg" alt="Four pages of the settings window: the bar arranged on a picture of it, the desktop's look, the appearance with the wallpaper transitions and the greeting scenes, and every key binding" width="100%">
+  <img src=".github/assets/settings.jpg" alt="Two pages of the settings window: the bar arranged on a picture of it, and the appearance with the wallpaper transitions and the greeting scenes" width="100%">
 </p>
 
 **Settings is the one panel that is not the island** — an ordinary window where
@@ -145,11 +145,7 @@ under names: *Moon castle*, *Fuji* and *Night bay* come with it.
 ## Games and pets
 
 <p align="center">
-  <img src=".github/assets/arcade.jpg" alt="The arcade shelf, and eleven games in the island: Tetris, Whack-a-Mole, Solitaire, Space Blaster, Target Smash, Snake Sprint, 2048 Mini, Lights Out, Flood Colors, Hextris and Bot Bash" width="100%">
-</p>
-
-<p align="center">
-  <img src=".github/assets/pets.jpg" alt="Five species — Dot, Sprout, Ember, Sol and Drift — as an egg, hatched, with their ears at level five and a star at level fifteen, and the five moods: beaming, content, peckish, lonely and asleep" width="100%">
+  <img src=".github/assets/games-and-pets.jpg" alt="Tetris and Flood Colors played in the island, and the pets' page with Pip out and the rest of the family waiting" width="100%">
 </p>
 
 **Eleven small games, played in the island** — `SUPER + G` opens a shelf, and
