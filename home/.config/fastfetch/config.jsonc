@@ -1,0 +1,110 @@
+// ╭──────────────────────────────────────────────────────────────────────────╮
+// │                                                                          │
+// │   C O N F I G                                                            │
+// │   system info greeting · colours from the active palette                 │
+// │                                                                          │
+// │   github.com/andreumassanet/impasto                                      │
+// │                                                                          │
+// ╰──────────────────────────────────────────────────────────────────────────╯
+
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+
+  // greeting.py renders the animated scene from the palette and links the
+  // selected one here; the path must match its STATE_DIR. `fa` passes a
+  // different source when the scene is random.
+  //
+  // kitty-icat is the only logo type that animates a GIF (kitty keeps looping
+  // it after fastfetch exits). A scene is 30 columns by 15 rows; no top
+  // padding, because fastfetch reserves no height for an icat logo.
+  "logo": {
+    "type": "kitty-icat",
+    "source": "~/.local/state/quickshell/greeting.gif",
+    "width": 30,
+    "padding": {
+      "top": 0,
+      "right": 3,
+      "left": 1
+    }
+  },
+
+  "display": {
+    "separator": "  ",
+    // Cyan carries the accent in the generated kitty palette.
+    "color": {
+      "keys": "cyan"
+    }
+  },
+
+  // Colour placeholders are SGR parameters, not palette indices: {#36} is cyan
+  // (the accent) and {#37} white (muted text). Icons are Material Design
+  // glyphs present in JetBrainsMono Nerd Font Mono.
+  "modules": [
+    "break",
+    {
+      "type": "title",
+      "format": "  {#36}󰣇 {#default}{user-name}{#37}@{#default}{host-name}"
+    },
+    {
+      "type": "separator",
+      "string": "  "
+    },
+    {
+      "type": "os",
+      "key": "  󰣇 os    ",
+      "format": "{pretty-name}"
+    },
+    {
+      "type": "kernel",
+      "key": "  󰒓 kernel",
+      "format": "{release}"
+    },
+    {
+      "type": "wm",
+      "key": "  󰖳 wm    "
+    },
+    {
+      "type": "terminal",
+      "key": "  󰆍 term  "
+    },
+    {
+      "type": "separator",
+      "string": "  ──────────────────────────"
+    },
+    {
+      "type": "cpu",
+      "key": "  󰘚 cpu   "
+    },
+    {
+      "type": "disk",
+      "key": "  󰋊 disk  "
+    },
+    {
+      "type": "memory",
+      "key": "  󰍛 mem   "
+    },
+    {
+      "type": "packages",
+      "key": "  󰏗 pkgs  "
+    },
+    {
+      "type": "separator",
+      "string": "  ──────────────────────────"
+    },
+    {
+      "type": "uptime",
+      "key": "  󰅐 uptime"
+    },
+    // Instead of the stock colors module: only these five slots are derived
+    // from the palette; black and magenta are not.
+    {
+      "type": "custom",
+      "key": "  󰏘 colors",
+      "format": "{#36}● {#32}● {#33}● {#31}● {#34}●{#default}"
+    },
+    // Two breaks: the scene ends on the first, so the prompt does not land
+    // on the logo.
+    "break",
+    "break"
+  ]
+}

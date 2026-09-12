@@ -1,0 +1,87 @@
+# ╭──────────────────────────────────────────────────────────────────────────╮
+# │                                                                          │
+# │   S T A R S H I P                                                        │
+# │   the prompt · two capsules on the left, state on the right              │
+# │                                                                          │
+# │   github.com/andreumassanet/impasto                                      │
+# │                                                                          │
+# ╰──────────────────────────────────────────────────────────────────────────╯
+
+# Left: identity and path, always the same. Right: whatever is worth saying
+# right now. Keeping the conditional segments on the right avoids powerline
+# separators that depend on whether a segment rendered.
+
+add_newline = false
+
+format = "$username$hostname$directory$character"
+right_format = "$status$cmd_duration$git_branch$git_status$nodejs$python"
+
+
+# ── LEFT ────────────────────────────────────────────────────────────────────
+
+# Text only, no backgrounds: dark greys on the black terminal have too little
+# contrast. Every colour is a bright ANSI name, so the prompt follows the
+# kitty palette. bright-black is too dark for text.
+
+[username]
+show_always = true
+style_user = "white"
+style_root = "bold bright-red"
+format = "[$user]($style)"
+
+[hostname]
+ssh_only = false
+style = "white"
+format = "[@$hostname ]($style)"
+
+# · cyan carries the accent in the kitty palette
+[directory]
+style = "bold cyan"
+format = "[$path]($style) "
+truncation_length = 3
+truncation_symbol = "…/"
+
+# Otherwise the repository root itself is shown as `…/impasto`.
+truncate_to_repo = false
+
+[character]
+success_symbol = "[❯](bold bright-green)"
+error_symbol = "[❯](bold bright-red)"
+
+
+# ── RIGHT ───────────────────────────────────────────────────────────────────
+
+# Bright ANSI only: normal red, blue and magenta are below 4.5:1 on the
+# background.
+
+# · disabled by default in starship
+[status]
+disabled = false
+style = "bright-red"
+symbol = " "
+format = "[$symbol$status]($style) "
+
+[cmd_duration]
+min_time = 2000
+style = "white"
+format = "[ $duration]($style) "
+
+[git_branch]
+symbol = " "
+style = "white"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "bright-yellow"
+format = "[$all_status$ahead_behind]($style) "
+
+# · only rendered in directories that use them
+[nodejs]
+symbol = " "
+style = "bright-green"
+format = "[$symbol($version)]($style) "
+
+[python]
+symbol = " "
+style = "bright-cyan"
+format = "[$symbol($version)]($style) "

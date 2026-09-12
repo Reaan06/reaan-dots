@@ -1,0 +1,21 @@
+# ╭──────────────────────────────────────────────────────────────────────────╮
+# │                                                                          │
+# │   M E T A D A T A                                                        │
+# │   sddm theme metadata                                                    │
+# │                                                                          │
+# │   github.com/andreumassanet/impasto                                      │
+# │                                                                          │
+# ╰──────────────────────────────────────────────────────────────────────────╯
+
+# No ConfigFile: the theme's values are fixed in components/Theme.qml.
+
+[SddmGreeterTheme]
+Name=impasto
+Description=The lock screen, before there is a desk behind it
+Author=Andreu Massanet
+License=GPL-3.0
+Type=sddm-theme
+Version=1.0
+Website=https://github.com/andreumassanet/impasto
+QtVersion=6
+MainScript=Main.qml

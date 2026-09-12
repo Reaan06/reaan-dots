@@ -1,0 +1,20 @@
+# ╭──────────────────────────────────────────────────────────────────────────╮
+# │                                                                          │
+# │   C A V A                                                                │
+# │   audio visualiser · input, bars and theme                               │
+# │                                                                          │
+# │   github.com/andreumassanet/impasto                                      │
+# │                                                                          │
+# ╰──────────────────────────────────────────────────────────────────────────╯
+
+# The interactive cava. The island's visualiser uses its own config,
+# quickshell/scripts/cava.conf (raw ASCII output, no colour).
+
+
+# ── COLOR ───────────────────────────────────────────────────────────────────
+
+# A name resolved inside ~/.config/cava/themes/; a path is silently ignored.
+# theme_manager.py writes it on every palette push and signals running cava
+# instances to reload.
+[color]
+theme = 'impasto'

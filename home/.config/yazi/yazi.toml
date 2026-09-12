@@ -1,0 +1,39 @@
+# ╭──────────────────────────────────────────────────────────────────────────╮
+# │                                                                          │
+# │   Y A Z I                                                                │
+# │   file manager · what opens what                                         │
+# │                                                                          │
+# │   github.com/andreumassanet/impasto                                      │
+# │                                                                          │
+# ╰──────────────────────────────────────────────────────────────────────────╯
+
+# ── OPENING ─────────────────────────────────────────────────────────────────
+
+# prepend_rules run before yazi's defaults, so these win over xdg-open without
+# restating the rest.
+#
+# · `orphan` detaches the process, so closing yazi keeps the viewer open.
+# · Arguments are `%s` (selection) or `%s1` (hovered); `"$@"` is silently
+#   ignored by current yazi.
+# · mpv only opens a window for video by default; --force-window gives audio
+#   files a window to control playback from.
+[opener]
+mpv = [
+    { run = 'mpv --force-window=yes %s', orphan = true, desc = "Play (mpv)" },
+]
+imv = [
+    { run = 'imv %s', orphan = true, desc = "View (imv)" },
+]
+
+[open]
+prepend_rules = [
+    { mime = "video/*", use = "mpv" },
+    { mime = "audio/*", use = "mpv" },
+    { mime = "image/*", use = "imv" },
+    # · HTML goes to the default browser (xdg-open), not yazi's text/* rule
+    #   ($EDITOR)
+    { mime = "text/html", use = "open" },
+]
+
+# PDFs and anything else fall through to yazi's catch-all xdg-open rule.
+# Archives use yazi's built-in extract opener.

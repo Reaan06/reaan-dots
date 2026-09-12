@@ -1,0 +1,38 @@
+# ╭──────────────────────────────────────────────────────────────────────────╮
+# │                                                                          │
+# │   A U R                                                                  │
+# │   aur packages · installed with yay or paru                              │
+# │                                                                          │
+# │   github.com/andreumassanet/impasto                                      │
+# │                                                                          │
+# ╰──────────────────────────────────────────────────────────────────────────╯
+
+# · `./setup packages` installs whatever is missing with yay or paru, and
+# · offers to build yay when neither is installed. Everything here is
+# · optional.
+
+
+# ── CURSOR ──────────────────────────────────────────────────────────────────
+
+bibata-cursor-theme-bin      # the XCursor env.lua names, for clients with no hyprcursor
+
+
+# ── CAPTURE ─────────────────────────────────────────────────────────────────
+
+wl-screenrec                 # the recorder's GPU encoder, tried before wf-recorder
+
+
+# ── TERMINAL PROGRAMS ───────────────────────────────────────────────────────
+
+unimatrix-git                # the matrix alias
+cbonsai                      # the bonsai alias
+tty-clock                    # the clock alias
+
+
+# ── THEMED APPLICATIONS ─────────────────────────────────────────────────────
+
+vscodium-bin                 # then ./setup vscodium
+zen-browser-bin
+vesktop-bin
+spotify
+spicetify-cli                # applies the palette to Spotify · ./setup spotify

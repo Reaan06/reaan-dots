@@ -1,0 +1,18 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Lua and zsh
+        run: sudo apt-get update && sudo apt-get install -y lua5.4 zsh
+
+      - name: Verify Python, Lua, zsh, bash, JSON and TOML syntax
+        run: ./setup check

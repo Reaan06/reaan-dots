@@ -1,0 +1,652 @@
+#!/usr/bin/env bash
+# ╭──────────────────────────────────────────────────────────────────────────╮
+# │                                                                          │
+# │   S E T U P                                                              │
+# │   the installer · packages, the files, the system, the plugins           │
+# │                                                                          │
+# │   github.com/andreumassanet/impasto                                      │
+# │                                                                          │
+# ╰──────────────────────────────────────────────────────────────────────────╯
+
+# `./setup help` lists the verbs. Bash rather than Python: Python is not in
+# `base`, and this has to run before anything else is installed.
+
+set -euo pipefail
+
+REPO=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+STATE=${XDG_STATE_HOME:-$HOME/.local/state}/impasto
+BACKUPS=$STATE/backups/$(date +%Y%m%d-%H%M%S)
+THEME_MANAGER=$REPO/home/.config/quickshell/scripts/theme_manager.py
+COMPOSITOR=$REPO/home/.config/quickshell/scripts/compositor.py
+
+# Where `system/` lands. Only a test points it anywhere but `/`, and a root
+# this user can write to is written without sudo.
+ROOT=${IMPASTO_ROOT:-/}
+ROOT=${ROOT%/}
+
+DRY=0
+NOCONFIRM=0
+WATCH=0
+QUIET=0
+HELPER=
+SKIP_PACKAGES=0
+SKIP_SYSTEM=0
+SKIP_PLUGINS=0
+SUDO=
+
+
+# ── OUTPUT ──────────────────────────────────────────────────────────────────
+
+usage() {
+    cat <<'EOF'
+Usage: ./setup <command> [options]
+
+  install     everything, in order: packages, the user folders, oh-my-zsh,
+              home/ into $HOME, system/ into /, the Hyprland plugins
+  update      git pull, then install again with the same options
+  uninstall   remove every installed file that has not been edited since
+
+  packages    install what packages/pacman.txt and packages/aur.txt list
+  sync        copy home/ into $HOME — how a change in the repository lands
+  system      copy system/ into / (asks for a password)
+  plugins     build and enable the two Hyprland plugins with hyprpm
+
+  cursors     fetch the vector cursor and build it in the chosen colour
+  spotify     re-apply the palette to Spotify (needs spicetify)
+  vscodium    install the editor's extensions and merge its settings
+  thunar      apply the file manager's settings and right-click menu
+
+  check       the syntax checks CI runs
+  help        this
+
+Options:
+  --skip-packages     install, update: leave the packages alone
+  --skip-system       install, update: leave / alone
+  --skip-plugins      install, update: do not build the plugins
+  --aur-helper NAME   yay or paru. The one installed is used, and when there
+                      is neither, this one is built from the AUR (yay if unset)
+  --noconfirm         answer every question with its default
+  -n, --dry-run       say what would change, and change nothing
+  -w, --watch         sync: copy again every time a file under home/ is saved
+
+What lands in $HOME and / is a copy. A file edited in place is kept, and the
+repository's version is written beside it as <name>.new; whatever was in the
+way the first time is moved to ~/.local/state/impasto/backups.
+EOF
+}
+
+section() { (( QUIET )) || printf '── %s ──\n' "$1"; }
+say()     { printf '  %s\n' "$*"; }
+fail()    { printf 'setup: %s\n' "$*" >&2; exit 1; }
+
+# Every change to the machine goes through act, so --dry-run is handled in one
+# place. Callers report what happened (or would have) themselves.
+act() {
+    if (( DRY )); then return 0; fi
+    "$@"
+}
+
+ask() {
+    if (( NOCONFIRM )); then return 0; fi
+    local answer
+    read -rp "  $1 [Y/n] " answer
+    [[ -z $answer || $answer == [Yy]* ]]
+}
+
+
+# ── FILES ───────────────────────────────────────────────────────────────────
+#
+# Both trees are copied, not linked, and a manifest records the hash of every
+# file written:
+#
+#   - a different file in the way the first time is moved to the backups;
+#   - a file unchanged since it was installed is replaced;
+#   - a file edited in place is kept, and the new version written as .new;
+#   - a file removed from the repository is deleted only if unedited;
+#   - a file setup did not install is never touched (e.g. generated themes).
+#
+# Changes under home/ reach $HOME through `sync`, or `sync --watch`.
+
+digest() { sha256sum < "$1" | cut -c1-64; }
+
+# Every file git would carry under a tree — tracked or not, never ignored, so
+# a __pycache__ lands nowhere — or every file, when this is not a checkout.
+files_in() {
+    local tree=$1 f
+    if git -C "$REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        git -C "$REPO" ls-files -z -co --exclude-standard -- "$tree" |
+            while IFS= read -r -d '' f; do
+                if [[ -f $REPO/$f && ! -L $REPO/$f ]]; then printf '%s\n' "${f#"$tree"/}"; fi
+            done
+    else
+        (cd "$REPO/$tree" && find . -type f -printf '%P\n')
+    fi
+}
+
+declare -A BEFORE=() AFTER=() LOOKED=() GONE=()
+
+read_manifest() {
+    BEFORE=()
+    [[ -f $1 ]] || return 0
+    local sum path
+    while IFS=$'\t' read -r sum path; do BEFORE[$path]=$sum; done < "$1"
+}
+
+write_manifest() {
+    if (( DRY )); then return 0; fi
+    mkdir -p "$(dirname "$1")"
+    local path
+    for path in "${!AFTER[@]}"; do printf '%s\t%s\n' "${AFTER[$path]}" "$path"; done |
+        sort -t $'\t' -k2 > "$1.tmp"
+    mv -f "$1.tmp" "$1"
+}
+
+# Atomic (copy beside, then rename): Quickshell reloads on every write and
+# must never read half a file.
+put() {
+    local src=$1 dst=$2
+    act $SUDO install -D -m "$(stat -c %a "$src")" "$src" "$dst.impasto-new"
+    act $SUDO mv -f "$dst.impasto-new" "$dst"
+}
+
+# Moves whatever was in the way into the backups. Files under / are copied
+# instead, since the backup directory belongs to this user.
+keep_aside() {
+    local dst=$1 name=$2
+    if (( DRY )); then return 0; fi
+    mkdir -p "$(dirname "$BACKUPS/$name")"
+    if [[ -n $SUDO ]]; then $SUDO cat "$dst" > "$BACKUPS/$name"; else mv "$dst" "$BACKUPS/$name"; fi
+}
+
+# Removes symlinks into the working tree left by a stow-style install. A
+# directory link must go before anything is copied through it, or the copy
+# lands back in the repository.
+unstow() {
+    local rel=$1 prefix= part
+    local -a parts
+    IFS=/ read -ra parts <<< "$rel"
+    for part in "${parts[@]}"; do
+        prefix=${prefix:+$prefix/}$part
+        [[ -z ${LOOKED[$prefix]:-} ]] || continue
+        LOOKED[$prefix]=1
+        [[ -L $HOME/$prefix ]] || continue
+        case $(readlink -m "$HOME/$prefix") in
+            "$REPO"/*)
+                act rm "$HOME/$prefix"
+                GONE[$prefix]=1
+                say "unlinked ~/$prefix — a symlink into the repository" ;;
+        esac
+    done
+}
+
+# Whether a path is under a link `unstow` removed (or would have, in a dry
+# run).
+gone() {
+    local prefix= part
+    local -a parts
+    IFS=/ read -ra parts <<< "$1"
+    for part in "${parts[@]}"; do
+        prefix=${prefix:+$prefix/}$part
+        [[ -z ${GONE[$prefix]:-} ]] || return 0
+    done
+    return 1
+}
+
+# Empty directories left behind, removed upwards — never the XDG roots, and
+# never a directory a package owns.
+tidy() {
+    local target=$1 dir=$2
+    while [[ -n $dir && $dir != . && $dir != / ]]; do
+        case $dir in
+            .config|.local|.local/share|.local/state|.cache|etc|usr|usr/share|var|var/lib) return 0 ;;
+        esac
+        if [[ -n $SUDO ]] && pacman -Qqo "$target/$dir" >/dev/null 2>&1; then return 0; fi
+        act $SUDO rmdir "$target/$dir" 2>/dev/null || return 0
+        dir=$(dirname "$dir")
+    done
+}
+
+# $1 tree, $2 destination, $3 manifest, $4 display prefix.
+deploy() {
+    local tree=$1 target=$2 manifest=$3 shown=$4
+    local rel src dst want have was said=0
+    read_manifest "$manifest"
+    AFTER=()
+    while IFS= read -r rel; do
+        src=$REPO/$tree/$rel
+        dst=$target/$rel
+        if [[ $tree == home ]]; then unstow "$rel"; fi
+        want=$(digest "$src")
+        AFTER[$rel]=$want
+        if [[ $tree == home ]] && gone "$rel"; then
+            put "$src" "$dst"; say "new      $shown$rel"; said=1
+        elif [[ -L $dst ]]; then
+            keep_aside "$dst" "$tree/$rel"; put "$src" "$dst"
+            say "replaced $shown$rel — the link that was there is in the backups"; said=1
+        elif [[ ! -e $dst ]]; then
+            put "$src" "$dst"; say "new      $shown$rel"; said=1
+        else
+            have=$(digest "$dst")
+            [[ $have != "$want" ]] || continue
+            was=${BEFORE[$rel]:-}
+            if [[ -z $was ]]; then
+                keep_aside "$dst" "$tree/$rel"; put "$src" "$dst"
+                say "replaced $shown$rel — the old one is in the backups"; said=1
+            elif [[ $have == "$was" ]]; then
+                put "$src" "$dst"; say "updated  $shown$rel"; said=1
+            elif [[ $want == "$was" ]]; then
+                continue    # edited locally, nothing new in the repository
+            elif [[ ! -f $dst.new ]] || [[ $(digest "$dst.new") != "$want" ]]; then
+                put "$src" "$dst.new"
+                say "kept     $shown$rel — edited here; the repository's is beside it as .new"; said=1
+            fi
+        fi
+    done < <(files_in "$tree" | sort)
+
+    for rel in "${!BEFORE[@]}"; do
+        [[ -z ${AFTER[$rel]:-} ]] || continue
+        dst=$target/$rel
+        if [[ -f $dst && ! -L $dst ]] && [[ $(digest "$dst") == "${BEFORE[$rel]}" ]]; then
+            act $SUDO rm -f "$dst"
+            tidy "$target" "$(dirname "$rel")"
+            say "removed  $shown$rel"; said=1
+        elif [[ -e $dst ]]; then
+            say "left     $shown$rel — gone from the repository, but edited here"; said=1
+        fi
+    done
+
+    write_manifest "$manifest"
+    if (( ! said && ! QUIET )); then say 'nothing to do'; fi
+}
+
+# First-run assets, written only when missing so the shell's own output wins:
+# the greeting scenes (rendered once in a fixed palette) and a minimal
+# `impasto` icon theme, because GTK falls back to hicolor, with no icons, when
+# settings.ini names a theme that does not exist. The stamp marks the
+# directory as the palette push's to replace.
+seed() {
+    local state=${XDG_STATE_HOME:-$HOME/.local/state}/quickshell
+    local icons=${XDG_DATA_HOME:-$HOME/.local/share}/icons/impasto
+    if [[ ! -e $state/greeting.gif || ! -f $state/greeting ]]; then
+        if ! command -v magick >/dev/null && ! command -v convert >/dev/null; then
+            say "skipped  the greeting's scenes — ImageMagick is not installed"
+        elif act python3 "$HOME/.config/quickshell/scripts/greeting.py" seed; then
+            say "seeded   the greeting's scenes"
+        else
+            say "skipped  the greeting's scenes — greeting.py seed failed"
+        fi
+    fi
+    if [[ ! -f $icons/index.theme ]]; then
+        act mkdir -p "$icons"
+        if (( ! DRY )); then
+            printf '%s\n' '[Icon Theme]' 'Name=impasto' 'Inherits=Papirus-Dark,Adwaita,hicolor' \
+                'Example=folder' 'Directories=' > "$icons/index.theme"
+        fi
+        say "seeded   the impasto icon theme"
+    fi
+    if [[ -d $icons ]]; then act touch "$icons/impasto.colour"; fi
+}
+
+
+# ── VERBS ───────────────────────────────────────────────────────────────────
+
+verb_sync() {
+    section home
+    SUDO=
+    deploy home "$HOME" "$STATE/home.manifest" '~/'
+    seed
+}
+
+# Re-syncs home/ on every save.
+verb_watch() {
+    command -v inotifywait >/dev/null || fail 'inotifywait is not installed (package: inotify-tools)'
+    verb_sync
+    say 'watching home/ — Ctrl+C to stop'
+    QUIET=1
+    while inotifywait -qq -r -e close_write,create,delete,move \
+        --exclude '/(\.git|__pycache__)/|\.impasto-new$|\.sw[po]$|~$' "$REPO/home"; do
+        LOOKED=() GONE=()
+        deploy home "$HOME" "$STATE/home.manifest" '~/'
+    done
+}
+
+# Copied because sddm reads its theme as its own user and cannot follow a link
+# into a 0700 home. Develop the greeter with `sddm-greeter-qt6 --test-mode`
+# against the working tree.
+verb_system() {
+    section system
+    SUDO=sudo
+    if [[ -w ${ROOT:-/} ]]; then SUDO=; fi
+    if [[ -n $SUDO ]] && (( ! DRY )); then sudo -v; fi
+    deploy system "$ROOT" "$STATE/system.manifest" '/'
+    # User pictures for the greeter and the lock screen. Never removed.
+    act $SUDO install -d -m 755 "$ROOT/var/lib/impasto/faces"
+    SUDO=
+}
+
+# Uses yay or paru if installed; otherwise offers to build one from the AUR.
+aur_helper() {
+    local -a yes=()
+    if (( NOCONFIRM )); then yes=(--noconfirm); fi
+    if [[ -z $HELPER ]]; then
+        for HELPER in yay paru; do
+            if command -v "$HELPER" >/dev/null; then return 0; fi
+        done
+        HELPER=yay
+    fi
+    if command -v "$HELPER" >/dev/null; then return 0; fi
+    if (( DRY )); then say "would build $HELPER-bin from the AUR"; return 0; fi
+    if ! ask "neither yay nor paru is installed — build $HELPER-bin from the AUR?"; then
+        say 'skipped: install these with an AUR helper'
+        return 1
+    fi
+    local tmp
+    tmp=$(mktemp -d)
+    git clone -q --depth=1 "https://aur.archlinux.org/$HELPER-bin.git" "$tmp/$HELPER-bin"
+    (cd "$tmp/$HELPER-bin" && makepkg -si "${yes[@]}")
+    rm -rf "$tmp"
+}
+
+# One name a line, `#` starting a comment anywhere.
+names() { sed 's/#.*//' "$1" | tr -s ' \t' '\n' | sed '/^$/d'; }
+
+# `pacman -T` also counts providers, so e.g. fnm-bin satisfies fnm.
+verb_packages() {
+    local -a yes=() want missing
+    if (( NOCONFIRM )); then yes=(--noconfirm); fi
+
+    section pacman
+    mapfile -t want < <(names "$REPO/packages/pacman.txt")
+    mapfile -t missing < <(pacman -T "${want[@]}" || true)
+    if (( ${#missing[@]} )); then
+        say "missing: ${missing[*]}"
+        act sudo pacman -S --needed "${yes[@]}" "${missing[@]}"
+    else
+        say "all ${#want[@]} installed"
+    fi
+
+    section aur
+    mapfile -t want < <(names "$REPO/packages/aur.txt")
+    mapfile -t missing < <(pacman -T "${want[@]}" || true)
+    if (( ! ${#missing[@]} )); then say "all ${#want[@]} installed"; return 0; fi
+    say "missing: ${missing[*]}"
+    aur_helper || return 0
+    act "$HELPER" -S --needed "${yes[@]}" "${missing[@]}"
+}
+
+# Creates the localised XDG folders (existing ones are never renamed). The
+# package's user unit only runs in systemd-started sessions, and captures
+# depend on user-dirs.dirs.
+folders() {
+    section 'user folders'
+    if command -v xdg-user-dirs-update >/dev/null; then
+        act xdg-user-dirs-update
+        say ok
+    else
+        say 'xdg-user-dirs is not installed (./setup packages)'
+    fi
+}
+
+# Cloned rather than installed with oh-my-zsh's script, which replaces
+# ~/.zshrc with its own template.
+omz() {
+    section oh-my-zsh
+    local omz=$HOME/.oh-my-zsh
+    local plugins=$omz/custom/plugins
+    if [[ ! -d $omz ]]; then
+        act git clone -q --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$omz"
+        say 'cloned oh-my-zsh'
+    fi
+    local name
+    for name in zsh-autosuggestions zsh-syntax-highlighting; do
+        if [[ ! -d $plugins/$name ]]; then
+            act git clone -q --depth=1 "https://github.com/zsh-users/$name" "$plugins/$name"
+            say "cloned $name"
+        fi
+    done
+    say ok
+}
+
+# hyprpm builds against the running Hyprland and keeps the .so in root's
+# /var/cache: it needs the session up, a terminal and a password.
+plugin() {
+    if ! hyprpm list 2>/dev/null | grep -q "$1"; then
+        act hyprpm update
+        act hyprpm add "$2"
+    fi
+    act hyprpm enable "$1"
+    say "$1 ok"
+}
+
+verb_plugins() {
+    section 'hyprland plugins'
+    if ! hyprctl version >/dev/null 2>&1; then
+        say 'needs a running Hyprland: run ./setup plugins from inside the session'
+        return 0
+    fi
+    plugin dynamic-cursors https://github.com/virtcode/hypr-dynamic-cursors
+    plugin hyprglass https://github.com/hyprnux/hyprglass
+    act hyprpm reload
+}
+
+verb_install() {
+    if (( ! SKIP_PACKAGES )); then verb_packages; fi
+    folders
+    omz
+    verb_sync
+    if (( ! SKIP_SYSTEM )); then verb_system; fi
+    if (( ! SKIP_PLUGINS )); then verb_plugins; fi
+    section done
+    say 'log out and in again, or reload what is running: hyprctl reload'
+}
+
+verb_update() {
+    section git
+    if git -C "$REPO" rev-parse --abbrev-ref '@{upstream}' >/dev/null 2>&1; then
+        act git -C "$REPO" pull --autostash --ff-only
+    else
+        say 'no upstream to pull from — installing what is here'
+    fi
+    verb_install
+}
+
+# Removes every installed file that is unedited; edited files are listed and
+# left. Backups are kept.
+remove_tree() {
+    local tree=$1 target=$2 manifest=$3 shown=$4 rel dst
+    section "$tree"
+    read_manifest "$manifest"
+    if (( ! ${#BEFORE[@]} )); then say 'nothing installed'; return 0; fi
+    for rel in "${!BEFORE[@]}"; do
+        dst=$target/$rel
+        if [[ -f $dst && ! -L $dst ]] && [[ $(digest "$dst") == "${BEFORE[$rel]}" ]]; then
+            act $SUDO rm -f "$dst"
+            tidy "$target" "$(dirname "$rel")"
+        elif [[ -e $dst ]]; then
+            say "left     $shown$rel — edited here"
+        fi
+    done
+    act rm -f "$manifest"
+    say "removed ${#BEFORE[@]} files"
+}
+
+verb_uninstall() {
+    SUDO=
+    remove_tree home "$HOME" "$STATE/home.manifest" '~/'
+    SUDO=sudo
+    if [[ -w ${ROOT:-/} ]]; then SUDO=; fi
+    remove_tree system "$ROOT" "$STATE/system.manifest" '/'
+    SUDO=
+    say "whatever was in the way when setup first ran is in $STATE/backups"
+}
+
+
+# ── EXTRAS ──────────────────────────────────────────────────────────────────
+
+# Shake-to-find magnifies the pointer, so it has to be a vector cursor. Fetches
+# Bibata's SVGs into the state directory and has compositor.py recolour and
+# compile them. The shell rebuilds it on wallpaper changes after that.
+verb_cursors() {
+    section 'cursor shape'
+    command -v hyprcursor-util >/dev/null || fail 'hyprcursor-util is not installed (package: hyprcursor)'
+    local src=${XDG_STATE_HOME:-$HOME/.local/state}/quickshell/cursor-src
+    act rm -rf "$src"
+    act mkdir -p "$src"
+    act git clone -q --depth=1 https://github.com/javigomezo/bibata-modern-classic-hyprcursor "$src" \
+        || fail 'clone failed'
+    say "fetched Bibata's SVGs into the state directory"
+    act python3 "$COMPOSITOR" cursor palette 24 --seed || fail 'build failed'
+    say 'built and set impasto-cursor'
+}
+
+# spicetify patches the colours into /opt/spotify, so the generated color.ini
+# does nothing until this runs. Not part of the palette push, which must not
+# restart the player. Also re-applies the theme after a Spotify update.
+verb_spotify() {
+    section spotify
+    command -v spicetify >/dev/null || fail 'spicetify is not installed'
+    [[ -w /opt/spotify ]] || fail '/opt/spotify is not writable: sudo chmod a+wr -R /opt/spotify'
+    act spicetify apply >/dev/null 2>&1 || act spicetify backup apply || fail 'spicetify failed'
+    say ok
+}
+
+# The palette push writes the colour theme. settings.json is merged here, with
+# the editor closed, because VSCodium rewrites it. Extensions come from Open
+# VSX; --force makes a re-run upgrade them.
+VSCODIUM_EXTENSIONS=(
+    pkief.material-icon-theme
+    miguelsolorio.fluent-icons
+    usernamehw.errorlens
+    oderwat.indent-rainbow
+    naumovs.color-highlight
+    mhutchie.git-graph
+    esbenp.prettier-vscode
+    christian-kohler.path-intellisense
+    streetsidesoftware.code-spell-checker
+    vscjava.vscode-java-pack
+    ms-python.python
+    charliermarsh.ruff
+    Continue.continue
+)
+
+verb_vscodium() {
+    section vscodium
+    command -v codium >/dev/null || fail 'vscodium is not installed'
+    if pgrep -x codium >/dev/null; then fail 'close VSCodium first: it rewrites settings.json as it exits'; fi
+    local e
+    for e in "${VSCODIUM_EXTENSIONS[@]}"; do
+        if act codium --install-extension "$e" --force >/dev/null 2>&1; then
+            say "$e"
+        else
+            say "$e FAILED — not on Open VSX, or no network"
+        fi
+    done
+    act python3 "$THEME_MANAGER" apply-vscodium
+    say 'settings merged — the theme lands on the next window'
+}
+
+# Colours come from gtk.css; the rest lives in xfconf and uca.xml (custom
+# actions). Thunar must be closed, since it writes its state back on exit.
+verb_thunar() {
+    section thunar
+    command -v thunar >/dev/null || fail 'thunar is not installed'
+    if pgrep -x thunar >/dev/null; then fail 'close Thunar first: it writes to the same channel as it exits'; fi
+    act python3 "$THEME_MANAGER" apply-thunar
+    say 'settings and right-click menu applied'
+}
+
+
+# ── CHECKS ──────────────────────────────────────────────────────────────────
+
+# What CI runs.
+verb_check() {
+    local -a files
+    cd "$REPO"
+
+    section python
+    mapfile -t files < <(find home -name '*.py')
+    python3 -c 'import ast, sys; [ast.parse(open(f, encoding="utf-8").read(), f) for f in sys.argv[1:]]' \
+        "${files[@]}"
+    say 'syntax ok'
+
+    # Arch calls it luac; Debian and Ubuntu, where CI runs, may only have
+    # luac5.4 unless the alternatives point the plain name at it.
+    section lua
+    local luac
+    luac=$(command -v luac || command -v luac5.4) || fail 'luac is not installed (package: lua)'
+    mapfile -t files < <(find home -name '*.lua')
+    "$luac" -p "${files[@]}"
+    say 'syntax ok'
+
+    # zsh -n takes one script at a time: further arguments become its
+    # positional parameters rather than more files to parse.
+    section zsh
+    local f
+    while IFS= read -r f; do zsh -n "$f"; done < <(find home -name '.zshrc' -o -name '*.zsh')
+    say 'syntax ok'
+
+    section bash
+    bash -n setup
+    say 'syntax ok'
+
+    # Plain JSON only (the one .jsonc file is fastfetch's). A typo in the
+    # palette board description would otherwise fail silently.
+    section json
+    mapfile -t files < <(find home -name '*.json')
+    python3 -c 'import json, sys; [json.load(open(f, encoding="utf-8")) for f in sys.argv[1:]]' "${files[@]}"
+    say 'syntax ok'
+
+    # yazi silently ignores a theme it cannot parse.
+    section toml
+    mapfile -t files < <(find home -name '*.toml')
+    python3 -c 'import sys, tomllib; [tomllib.load(open(f, "rb")) for f in sys.argv[1:]]' "${files[@]}"
+    say 'syntax ok'
+}
+
+
+# ── MAIN ────────────────────────────────────────────────────────────────────
+
+main() {
+    local verb=
+    while (( $# )); do
+        case $1 in
+            --skip-packages) SKIP_PACKAGES=1 ;;
+            --skip-system)   SKIP_SYSTEM=1 ;;
+            --skip-plugins)  SKIP_PLUGINS=1 ;;
+            --aur-helper)    (( $# > 1 )) || fail '--aur-helper takes yay or paru'; HELPER=$2; shift ;;
+            --aur-helper=*)  HELPER=${1#*=} ;;
+            --noconfirm)     NOCONFIRM=1 ;;
+            -n|--dry-run)    DRY=1 ;;
+            -w|--watch)      WATCH=1 ;;
+            -h|--help)       usage; exit 0 ;;
+            -*)              fail "unknown option: $1 (./setup help)" ;;
+            *)               [[ -z $verb ]] || fail "one command at a time: $verb, or $1"; verb=$1 ;;
+        esac
+        shift
+    done
+    if [[ -z $verb ]]; then usage; exit 0; fi
+    case $HELPER in
+        ''|yay|paru) ;;
+        *) fail '--aur-helper takes yay or paru' ;;
+    esac
+    if (( DRY )); then printf 'dry run — nothing on this machine is changed\n'; fi
+
+    case $verb in
+        install)   verb_install ;;
+        update)    verb_update ;;
+        uninstall) verb_uninstall ;;
+        packages)  verb_packages ;;
+        sync)      if (( WATCH )); then verb_watch; else verb_sync; fi ;;
+        system)    verb_system ;;
+        plugins)   verb_plugins ;;
+        cursors)   verb_cursors ;;
+        spotify)   verb_spotify ;;
+        vscodium)  verb_vscodium ;;
+        thunar)    verb_thunar ;;
+        check)     verb_check ;;
+        help|-h|--help) usage ;;
+        *)         fail "unknown command: $verb (./setup help)" ;;
+    esac
+}
+
+main "$@"

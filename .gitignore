@@ -1,0 +1,28 @@
+# Generated at runtime
+__pycache__/
+*.py[cod]
+
+# Scratch QML run with `qs -p`. Ignored so `./setup sync`, which copies what
+# git would carry, never installs one.
+_probe*.qml
+_mock*.qml
+
+# Editor and OS noise
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Per-machine overrides. The negation keeps home/.local/ from matching *.local.
+*.local
+!**/.local/
+*.local.conf
+
+# Secrets — never commit
+.env
+.env.*
+*.key
+*.pem
+*.gpg
+id_rsa
+id_ed25519
