@@ -90,10 +90,8 @@ a card, a large square and a band. Right-click the wallpaper to arrange — a tr
 of every module slides up, a corner is pulled for another shape, and a click
 opens that widget's own look.
 
-**Two themes on the same modules.** *Modern* is a figure with a caption;
-*Analogue* draws each module as an object — a clock with hands, a thermometer, a
-wall calendar, a record that turns while it plays, an hourglass. The theme is
-one setting for the desk and a choice per widget.
+**Two themes on the same modules**: *Modern* is a figure with a caption,
+*Analogue* draws each one as an object, and either is a choice per widget.
 
 <p align="center">
   <img src=".github/assets/repaint.gif" alt="The wallpaper changing three times, and the bar, the widgets, the terminal and the system monitor repainting with each one" width="100%">
@@ -122,6 +120,17 @@ with others along an edge as tabs that peek out under the pointer.
 cards dragged between the lanes, and a task's day shows as a dot under the
 month wherever a month is drawn.
 
+## Games and pets
+
+<p align="center">
+  <img src=".github/assets/games-and-pets.jpg" alt="Tetris and Flood Colors played in the island, and the pets' page with Pip out and the rest of the family waiting" width="100%">
+</p>
+
+**Eleven small games, played in the island** — `SUPER + G` opens a shelf, and
+the island becomes the board. **A family of five small creatures lives on the
+bar**: one out at a time, earning levels from being fed and played with, each
+hatched from an egg. Nothing dies, and a week away costs nothing.
+
 ## Lock and login
 
 <p align="center">
@@ -142,22 +151,11 @@ clock, the same face and the same field.
 each option is drawn as the thing it changes, and profiles keep whole desks
 under names: *Moon castle*, *Fuji* and *Night bay* come with it.
 
-## Games and pets
-
-<p align="center">
-  <img src=".github/assets/games-and-pets.jpg" alt="Tetris and Flood Colors played in the island, and the pets' page with Pip out and the rest of the family waiting" width="100%">
-</p>
-
-**Eleven small games, played in the island** — `SUPER + G` opens a shelf, and
-the island becomes the board. **A family of five small creatures lives on the
-bar**: one out at a time, earning levels from being fed and played with, each
-hatched from an egg. Nothing dies, and a week away costs nothing.
-
 ## Installation
 
-Arch Linux, and a Hyprland recent enough to read a Lua configuration. Run it
-from a terminal inside the Hyprland session — the plugins are built against the
-compositor that is running:
+Arch Linux, and Hyprland 0.56 or newer (tested on 0.56.2), configured in Lua.
+Run it from a terminal inside the Hyprland session — the plugins are built
+against the compositor that is running:
 
 ```bash
 git clone https://github.com/andreumassanet/impasto.git ~/impasto
