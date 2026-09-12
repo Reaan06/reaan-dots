@@ -21,7 +21,6 @@
   <a href="#the-bar">The bar</a> ·
   <a href="#the-desktop">The desktop</a> ·
   <a href="#one-palette-everywhere">The palette</a> ·
-  <a href="#the-terminal">The terminal</a> ·
   <a href="#installation">Installation</a> ·
   <a href="#keys">Keys</a>
 </p>
@@ -52,15 +51,6 @@ the island rather than into a popup of its own.
 
 <p align="center">
   <img src=".github/assets/island-details.jpg" alt="Module details in the island: the player, the battery, Claude Code's usage, the processor and memory, the recorder, the Wi-Fi list, the weather, the pet, the volume, the month with task dots, the tasks, a countdown and the GitHub wall" width="100%">
-</p>
-
-**The control centre is one of its shapes**: a grid of six columns by eight rows
-whose blocks — toggles, sliders, the player, the weather, the month, a clock, a
-note, the tasks — are dragged from a tray of live miniatures and given one of
-the sizes they have a face for.
-
-<p align="center">
-  <img src=".github/assets/control-centre.jpg" alt="The control centre rearranged — the signature block, the player, a clock, the month, toggles, the pet, a note, the tasks, the weather — and the same panel being arranged, with the tray of blocks under it and the clock's inspector open" width="100%">
 </p>
 
 ## The bar
@@ -130,18 +120,11 @@ down to its folders, Vesktop, Zen and Spotify. Or pick one of nine palettes
 instead. The desk comes with forty paintings, in the style it is named after.
 
 <p align="center">
-  <img src=".github/assets/appearance.jpg" alt="The appearance panel: a strip of the paintings on SUPER + T, and a strip of the palettes under it on SUPER + SHIFT + T" width="100%">
-</p>
-
-## The terminal
-
-<p align="center">
   <img src=".github/assets/terminal.jpg" alt="kitty tiled three ways in the palette of a painting of a castle under a full moon: yazi previewing a wallpaper, a bonsai growing, and neovim editing the island's QML" width="100%">
 </p>
 
-The terminal wears the island's black with the wallpaper's colour in it. The
-prompt is laid out like the bar, and `fa` greets you with fastfetch beside one
-of four animated scenes, drawn in pixel art out of the current palette.
+In the terminal, the prompt is laid out like the bar, and `fa` greets you with
+fastfetch beside an animated scene drawn in pixel art out of the palette.
 
 ## Lock and login
 
@@ -149,11 +132,9 @@ of four animated scenes, drawn in pixel art out of the current palette.
   <img src=".github/assets/lock-and-login.jpg" alt="The lock screen over the blurred desk, and the SDDM login screen over a painting of brush strokes — the same clock, the same face, the same field" width="100%">
 </p>
 
-**The shell locks the session itself**, so the desk stays on screen behind the
-lock, blurred, and it is its own idle daemon — lock, screen off and sleep, held
-off while a film plays. **The login screen is the lock screen with the desk
-taken away**: an SDDM theme with the same clock, the same face and the same
-field.
+**The shell locks the session itself**, over the blurred desk, and the login
+screen is the same lock with the desk taken away: an SDDM theme with the same
+clock, the same face and the same field.
 
 ## Settings
 
@@ -161,13 +142,9 @@ field.
   <img src=".github/assets/settings.jpg" alt="Four pages of the settings window: the bar arranged on a picture of it, the desktop's look, the appearance with the wallpaper transitions and the greeting scenes, and every key binding" width="100%">
 </p>
 
-**Settings is the one panel that is not the island** — an ordinary window,
-while the island reacts to what is being changed. Where an option is a shape,
-the control is the shape: a real chip, a real bar, the real clock.
-
-**Profiles** keep whole desks under names — the bar, the widgets, the dock, the
-look, the keys and the wallpaper — and export to a file you can import on
-another machine. Three come with it: *Moon castle*, *Fuji* and *Night bay*.
+**Settings is the one panel that is not the island** — an ordinary window where
+each option is drawn as the thing it changes, and profiles keep whole desks
+under names: *Moon castle*, *Fuji* and *Night bay* come with it.
 
 ## Games and pets
 
@@ -182,10 +159,6 @@ bar**: one out at a time, earning levels from being fed and played with, each
 hatched from an egg. Nothing dies, and a week away costs nothing.
 
 ## And the rest
-
-<p align="center">
-  <img src=".github/assets/and-the-rest.jpg" alt="The workspace overview with live windows, the capture surface with a region drawn on a photograph of the screen, the dock with a window menu open, the system statistics, and the pet's panel" width="100%">
-</p>
 
 - **The overview** is every workspace as a live scale model of the screen;
   drag a window from one to another.
@@ -263,66 +236,16 @@ file you edit afterwards is left alone, with the new version beside it as
 `<name>.new`. Editing the repository itself? `./setup sync` copies it onto the
 desk, and `./setup sync --watch` keeps doing it on every save.
 
-<details>
-<summary><b>What every package is for</b></summary>
-<br>
-
-The packages are two lists, `packages/pacman.txt` and `packages/aur.txt`,
-grouped by what each one is for, and `./setup packages` installs whatever of
-them is missing — the first with pacman, the second with yay or paru. The first
-two sections of the pacman list are the desk itself; every section after them
-is one feature, and a line commented out is a package skipped.
-
-The desktop needs `hyprland`, `quickshell`, `awww` and `imagemagick`, and the
-terminal `kitty`, `zsh`, `oh-my-zsh`, `starship` and a Nerd Font — the prompt's
-arrow is a Nerd Font glyph. `brightnessctl`, `wireplumber`, `nmcli`,
-`bluez-utils` and `power-profiles-daemon` back the quick controls; each is
-optional and its control disables itself when missing. `hyprsunset` is the
-night light, run only while the filter is on.
-
-`xdg-desktop-portal-hyprland` and `xdg-desktop-portal-gtk` are what an
-application asks when it wants something it cannot take for itself — screen
-sharing in a browser or in Vesktop, and every Open dialog. Neither needs
-configuring: the Hyprland backend's default routing is already right, and the
-file dialog is GTK3, so it follows the palette.
-
-Captures need `grim` and `wl-clipboard`; `satty` annotates and `tesseract` reads
-a region as text, and each one missing takes its own choice off the capture bar.
-Recording wants `wf-recorder` or `wl-screenrec` (the second encodes on the GPU,
-from the AUR); with neither, the recorder is not on the bar at all. Captures and
-recordings land in a folder of their own inside your pictures and videos
-folders, whatever your language calls those, and an `XDG_SCREENSHOTS_DIR` or
-`XDG_SCREENCASTS_DIR` line in `~/.config/user-dirs.dirs` sends them elsewhere.
-`hyprpicker` is the colour under the pointer. The clipboard history needs
-nothing more: `wl-paste --watch` is what reads a selection without holding the
-keyboard, so there is no `cliphist`.
-
-`fzf`, `zoxide`, `fnm` and `yazi` are reached for by `.zshrc` only if they are
-installed; `fastfetch` is the greeting; `btop`, `cava` and `yazi` get their
-themes on the first palette push. `unimatrix`, `cbonsai`, `tty-clock` and
-`asciiquarium` back the `matrix`, `bonsai` and `clock` aliases and need no
-theme, because they draw in the terminal's own colours. `less` is not optional:
-it is kitty's scrollback pager.
-
-Two things are Hyprland plugins rather than options, built by `./setup plugins`
-with `hyprpm` (which wants `cmake`, `meson`, `cpio`, `git` and `gcc`, a running
-Hyprland, and a password — its store is root's). **Shake to find** grows the
-pointer when it is shaken; **glass** frosts and bends the blur behind a window,
-off by default and switched on in Settings → Appearance. A Hyprland update takes
-both away until `hyprpm update` or `./setup plugins` has run. The pointer is a
-single vector shape, so it stays sharp when it grows and can take the palette's
-colour: `./setup cursors` fetches Bibata's SVGs and `hyprcursor-util` compiles
-them.
-
-</details>
+Every package is listed in `packages/pacman.txt` and `packages/aur.txt`, grouped
+by what it is for; an optional one that is missing takes its own control away
+rather than failing.
 
 <details>
 <summary><b>Making the rest of the machine agree</b></summary>
 <br>
 
-What opens a file, whether a GTK application comes up dark and which icon theme
-it draws are the machine's settings rather than files this repository can
-carry, so they are commands, run once:
+What opens a file and how GTK applications look are the machine's settings, so
+they are commands, run once:
 
 ```bash
 xdg-mime default imv.desktop image/jpeg image/png image/gif image/webp image/svg+xml
@@ -333,50 +256,21 @@ gsettings set org.gnome.desktop.interface color-scheme prefer-dark
 gsettings set org.gnome.desktop.interface icon-theme impasto
 ```
 
-`impasto` is the icon theme the palette push writes: Papirus, with the folders
-in the wallpaper's colour. `./setup install` seeds it, so the name resolves
-before the shell has ever run.
-
 </details>
 
 <details>
 <summary><b>The windows that need one command</b></summary>
 <br>
 
-**VSCodium** (`vscodium-bin`) gets its colour theme from the push as a whole
-extension in `~/.vscode-oss/extensions/`; nothing has to be installed for that.
-Its extensions (all from Open VSX), its font and its chrome are one command, run
-with the editor closed — it merges into `settings.json` and keeps whatever else
-is in there:
+- `./setup vscodium` — VSCodium's extensions, font and chrome; run it with the
+  editor closed
+- `./setup thunar` — Thunar's toolbar, sorting and right-click entries, Set as
+  Wallpaper among them
+- `./setup spotify` — lands the palette in Spotify through spicetify, and repairs
+  it after a Spotify update
 
-```bash
-./setup vscodium
-```
-
-**Thunar** takes the palette like every GTK3 window and wants `tumbler`,
-`ffmpegthumbnailer`, `gvfs` and `papirus-icon-theme`. Its settings live in
-xfconf, a daemon rather than a file, so they are one command too — its toolbar,
-its sorting, and five entries in the right-click menu: a terminal here, yazi
-here, the editor, the path on the clipboard, and Set as Wallpaper:
-
-```bash
-./setup thunar
-```
-
-**Spotify** is themed by spicetify, which patches the client rather than reading
-a file, so the push writes the colours and stops. This lands them, and is also
-the repair after a Spotify update:
-
-```bash
-./setup spotify
-```
-
-**Zen** (`zen-browser-bin`) needs nothing: the push writes a `userChrome.css`
-and the one preference that makes it read it into the profile, and the colours
-arrive with the next window. Zen's own workspace theme picker stops having an
-effect while this is on. **Vesktop** reads the push's stylesheet once it is
-ticked under Vencord's themes. **Qt and KDE windows** need `qt6ct`, which the
-push configures; without it they come up in Breeze's light grey.
+Zen needs nothing, Vesktop takes the palette once it is ticked under Vencord's
+themes, and Qt and KDE windows need `qt6ct`.
 
 </details>
 
@@ -384,24 +278,15 @@ push configures; without it they come up in Breeze's light grey.
 <summary><b>The login screen</b></summary>
 <br>
 
-The SDDM theme is `system/`, copied into `/usr/share` by `install` — copied,
-because sddm reads its theme as its own user and cannot see into a 0700 home.
-`./setup system` does that part on its own. Try it before switching to it:
+`install` copies the SDDM theme into `/usr/share`. Try it before switching to
+it, then set `Current=impasto` under `[Theme]` in `/etc/sddm.conf.d/`:
 
 ```bash
 sddm-greeter-qt6 --test-mode --theme system/usr/share/sddm/themes/impasto
 ```
 
-Then set `Current=impasto` under `[Theme]` in whichever file in
-`/etc/sddm.conf.d/` sets it. The lock screen and the login screen read one
-picture from one place, `/var/lib/impasto/faces/<username>.face.icon`; the
-picture itself is yours to put there, and `uninstall` leaves that directory
-alone.
-
-`system/` also carries one line for logind: a tap on the power button is left
-to the shell, which opens the session menu, instead of powering the machine
-off. It applies from the next boot; holding the button is still the
-firmware's own forced power-off.
+The face on the lock and login screens is
+`/var/lib/impasto/faces/<username>.face.icon`, yours to put there.
 
 </details>
 
