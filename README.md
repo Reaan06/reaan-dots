@@ -119,10 +119,6 @@ prompt, btop, cava, yazi, neovim, VSCodium, the GTK, Qt and KDE windows, Thunar
 down to its folders, Vesktop, Zen and Spotify. Or pick one of nine palettes
 instead. The desk comes with forty paintings, in the style it is named after.
 
-<p align="center">
-  <img src=".github/assets/terminal.jpg" alt="kitty tiled three ways in the palette of a painting of a castle under a full moon: yazi previewing a wallpaper, a bonsai growing, and neovim editing the island's QML" width="100%">
-</p>
-
 In the terminal, the prompt is laid out like the bar, and `fa` greets you with
 fastfetch beside an animated scene drawn in pixel art out of the palette.
 
@@ -149,55 +145,17 @@ under names: *Moon castle*, *Fuji* and *Night bay* come with it.
 ## Games and pets
 
 <p align="center">
-  <img src=".github/assets/arcade.jpg" alt="The arcade shelf, and eleven games in the island: Tetris, Whack-a-Mole, Solitaire, Space Blaster, Target Smash, Snake Sprint, 2048 Mini, Lights Out, Flood Colors, Hextris and Bot Bash" width="49%">
-  <img src=".github/assets/pets.jpg" alt="Five species — Dot, Sprout, Ember, Sol and Drift — as an egg, hatched, with their ears at level five and a star at level fifteen, and the five moods: beaming, content, peckish, lonely and asleep" width="49%">
+  <img src=".github/assets/arcade.jpg" alt="The arcade shelf, and eleven games in the island: Tetris, Whack-a-Mole, Solitaire, Space Blaster, Target Smash, Snake Sprint, 2048 Mini, Lights Out, Flood Colors, Hextris and Bot Bash" width="100%">
+</p>
+
+<p align="center">
+  <img src=".github/assets/pets.jpg" alt="Five species — Dot, Sprout, Ember, Sol and Drift — as an egg, hatched, with their ears at level five and a star at level fifteen, and the five moods: beaming, content, peckish, lonely and asleep" width="100%">
 </p>
 
 **Eleven small games, played in the island** — `SUPER + G` opens a shelf, and
 the island becomes the board. **A family of five small creatures lives on the
 bar**: one out at a time, earning levels from being fed and played with, each
 hatched from an egg. Nothing dies, and a week away costs nothing.
-
-## And the rest
-
-- **The overview** is every workspace as a live scale model of the screen;
-  drag a window from one to another.
-- **One key to capture.** `SUPER + SHIFT + S` photographs the screen and lets
-  you draw on the photograph — region, window or screen, as a picture or a
-  recording, saved, copied, annotated or read as text.
-- **The dock** is a shelf on any edge but the top: the applications you keep,
-  then whatever else is open.
-- **Every key is on one sheet** — `SUPER + H` turns the island into all of them.
-
-<details>
-<summary><b>Components</b></summary>
-<br>
-
-| | | |
-|---|---|---|
-| 🪟 | Compositor | [Hyprland](https://hypr.land) |
-| 🖱️ | Shake to find | [hypr-dynamic-cursors](https://github.com/VirtCode/hypr-dynamic-cursors) |
-| 🫧 | Glass on the windows | [hyprglass](https://github.com/hyprnux/hyprglass) |
-| 🐚 | Desktop shell | [Quickshell](https://quickshell.org) |
-| 🖼️ | Wallpaper daemon | [awww](https://github.com/LGFae/swww) |
-| 🖥️ | Terminal | [kitty](https://sw.kovidgoyal.net/kitty/) |
-| ⌨️ | Interactive shell | [zsh](https://www.zsh.org) · [oh-my-zsh](https://ohmyz.sh) |
-| ❯ | Prompt | [starship](https://starship.rs) |
-| 🎨 | Greeting | [fastfetch](https://github.com/fastfetch-cli/fastfetch) |
-| 📊 | System monitor | [btop](https://github.com/aristocratos/btop) |
-| 🎵 | Audio visualiser | [cava](https://github.com/karlstav/cava) |
-| 📁 | File manager | [yazi](https://yazi-rs.github.io) |
-| 🗂️ | File manager in a window | [Thunar](https://docs.xfce.org/xfce/thunar/start) |
-| ✏️ | Editor | [neovim](https://neovim.io) |
-| 📝 | Editor in a window | [VSCodium](https://vscodium.com) |
-| 🖼️ | Image viewer | [imv](https://sr.ht/~exec64/imv/) |
-| 🪄 | Annotator | [satty](https://github.com/gabm/Satty) |
-| 💬 | Chat | [Vesktop](https://github.com/Vencord/Vesktop) |
-| 🎧 | Player | [Spotify](https://www.spotify.com) · [spicetify](https://spicetify.app) |
-| 🌐 | Browser | [Zen](https://zen-browser.app) |
-| 🔑 | Login screen | [SDDM](https://github.com/sddm/sddm) |
-
-</details>
 
 ## Installation
 
@@ -239,6 +197,36 @@ desk, and `./setup sync --watch` keeps doing it on every save.
 Every package is listed in `packages/pacman.txt` and `packages/aur.txt`, grouped
 by what it is for; an optional one that is missing takes its own control away
 rather than failing.
+
+<details>
+<summary><b>Components</b></summary>
+<br>
+
+| | | |
+|---|---|---|
+| 🪟 | Compositor | [Hyprland](https://hypr.land) |
+| 🖱️ | Shake to find | [hypr-dynamic-cursors](https://github.com/VirtCode/hypr-dynamic-cursors) |
+| 🫧 | Glass on the windows | [hyprglass](https://github.com/hyprnux/hyprglass) |
+| 🐚 | Desktop shell | [Quickshell](https://quickshell.org) |
+| 🖼️ | Wallpaper daemon | [awww](https://github.com/LGFae/swww) |
+| 🖥️ | Terminal | [kitty](https://sw.kovidgoyal.net/kitty/) |
+| ⌨️ | Interactive shell | [zsh](https://www.zsh.org) · [oh-my-zsh](https://ohmyz.sh) |
+| ❯ | Prompt | [starship](https://starship.rs) |
+| 🎨 | Greeting | [fastfetch](https://github.com/fastfetch-cli/fastfetch) |
+| 📊 | System monitor | [btop](https://github.com/aristocratos/btop) |
+| 🎵 | Audio visualiser | [cava](https://github.com/karlstav/cava) |
+| 📁 | File manager | [yazi](https://yazi-rs.github.io) |
+| 🗂️ | File manager in a window | [Thunar](https://docs.xfce.org/xfce/thunar/start) |
+| ✏️ | Editor | [neovim](https://neovim.io) |
+| 📝 | Editor in a window | [VSCodium](https://vscodium.com) |
+| 🖼️ | Image viewer | [imv](https://sr.ht/~exec64/imv/) |
+| 🪄 | Annotator | [satty](https://github.com/gabm/Satty) |
+| 💬 | Chat | [Vesktop](https://github.com/Vencord/Vesktop) |
+| 🎧 | Player | [Spotify](https://www.spotify.com) · [spicetify](https://spicetify.app) |
+| 🌐 | Browser | [Zen](https://zen-browser.app) |
+| 🔑 | Login screen | [SDDM](https://github.com/sddm/sddm) |
+
+</details>
 
 <details>
 <summary><b>Making the rest of the machine agree</b></summary>
