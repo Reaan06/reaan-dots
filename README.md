@@ -37,8 +37,6 @@ of `home/` is the desk around it: the terminal, the prompt, two editors, two
 file managers, a browser, a chat client, the login screen. **Change the
 wallpaper and all of it follows.**
 
-Everything in these pictures is the real shell, photographed.
-
 ## The island
 
 <p align="center">
@@ -56,6 +54,15 @@ the island rather than into a popup of its own.
   <img src=".github/assets/island-details.jpg" alt="Module details in the island: the player, the battery, Claude Code's usage, the processor and memory, the recorder, the Wi-Fi list, the weather, the pet, the volume, the month with task dots, the tasks, a countdown and the GitHub wall" width="100%">
 </p>
 
+**The control centre is one of its shapes**: a grid of six columns by eight rows
+whose blocks — toggles, sliders, the player, the weather, the month, a clock, a
+note, the tasks — are dragged from a tray of live miniatures and given one of
+the sizes they have a face for.
+
+<p align="center">
+  <img src=".github/assets/control-centre.jpg" alt="The control centre rearranged — the signature block, the player, a clock, the month, toggles, the pet, a note, the tasks, the weather — and the same panel being arranged, with the tray of blocks under it and the clock's inspector open" width="100%">
+</p>
+
 ## The bar
 
 <p align="center">
@@ -67,21 +74,6 @@ picture of the bar, then drawn grouped round the island, spread to the edges, or
 all inside one capsule. Each shows its symbol or its ring, with its figure
 always, never or under the pointer — two settings for the whole bar, and any
 piece can have a look of its own.
-
-<p align="center">
-  <img src=".github/assets/bar-modules.jpg" alt="A bar carrying every module, shown four ways: the symbol, the symbol and its figure, the ring, the ring and its figure" width="100%">
-</p>
-
-## The control centre
-
-<p align="center">
-  <img src=".github/assets/control-centre.jpg" alt="The control centre rearranged — the signature block, the player, a clock, the month, toggles, the pet, a note, the tasks, the weather — and the same panel being arranged, with the tray of blocks under it and the clock's inspector open" width="100%">
-</p>
-
-**A grid you arrange, six columns by eight rows.** Toggles, sliders, the
-player, the weather, the month, notifications, a clock, the pet, a note and the
-tasks are blocks, dragged from a tray of live miniatures under the island and
-given one of the sizes they have a face for.
 
 ## The launcher
 
@@ -110,10 +102,6 @@ opens that widget's own look.
 *Analogue* draws each module as an object — a clock with hands, a thermometer, a
 wall calendar, a record that turns while it plays, an hourglass. The theme is
 one setting for the desk and a choice per widget.
-
-<p align="center">
-  <img src=".github/assets/desktop-styles.jpg" alt="The same five widgets in four styles: a capsule, the accent as a ground, an outline, and bare contents on the painting" width="100%">
-</p>
 
 ## Notes and tasks
 
@@ -153,16 +141,7 @@ instead. The desk comes with forty paintings, in the style it is named after.
 
 The terminal wears the island's black with the wallpaper's colour in it. The
 prompt is laid out like the bar, and `fa` greets you with fastfetch beside one
-of four animated scenes, drawn in pixel art out of the current palette:
-
-<table align="center">
-  <tr>
-    <td align="center" width="25%"><img src=".github/assets/greeting-lava.gif" alt="A lava lamp" width="100%"><br><sub><code>fa lava</code></sub></td>
-    <td align="center" width="25%"><img src=".github/assets/greeting-critters.gif" alt="Critters under the stars" width="100%"><br><sub><code>fa critters</code></sub></td>
-    <td align="center" width="25%"><img src=".github/assets/greeting-koi.gif" alt="Koi in a stone pond" width="100%"><br><sub><code>fa koi</code></sub></td>
-    <td align="center" width="25%"><img src=".github/assets/greeting-invaders.gif" alt="Space Invaders" width="100%"><br><sub><code>fa invaders</code></sub></td>
-  </tr>
-</table>
+of four animated scenes, drawn in pixel art out of the current palette.
 
 ## Lock and login
 
@@ -184,31 +163,23 @@ field.
 
 **Settings is the one panel that is not the island** — an ordinary window,
 while the island reacts to what is being changed. Where an option is a shape,
-the control is the shape: a real chip, a real bar, the real clock. The window
-also speaks Spanish.
+the control is the shape: a real chip, a real bar, the real clock.
 
 **Profiles** keep whole desks under names — the bar, the widgets, the dock, the
 look, the keys and the wallpaper — and export to a file you can import on
 another machine. Three come with it: *Moon castle*, *Fuji* and *Night bay*.
 
-## The arcade
+## Games and pets
 
 <p align="center">
-  <img src=".github/assets/arcade.jpg" alt="The arcade shelf, and eleven games in the island: Tetris, Whack-a-Mole, Solitaire, Space Blaster, Target Smash, Snake Sprint, 2048 Mini, Lights Out, Flood Colors, Hextris and Bot Bash" width="100%">
+  <img src=".github/assets/arcade.jpg" alt="The arcade shelf, and eleven games in the island: Tetris, Whack-a-Mole, Solitaire, Space Blaster, Target Smash, Snake Sprint, 2048 Mini, Lights Out, Flood Colors, Hextris and Bot Bash" width="49%">
+  <img src=".github/assets/pets.jpg" alt="Five species — Dot, Sprout, Ember, Sol and Drift — as an egg, hatched, with their ears at level five and a star at level fifteen, and the five moods: beaming, content, peckish, lonely and asleep" width="49%">
 </p>
 
-**Eleven small games, played in the island.** `SUPER + G` opens a shelf; pick a
-card and the island becomes that game's board, drawn in the palette's own tints.
-
-## The pets
-
-<p align="center">
-  <img src=".github/assets/pets.jpg" alt="Five species — Dot, Sprout, Ember, Sol and Drift — as an egg, hatched, with their ears at level five and a star at level fifteen, and the five moods: beaming, content, peckish, lonely and asleep" width="100%">
-</p>
-
-**A family of five small creatures lives on the bar.** One is out at a time and
-earns levels from being fed and played with; each hatches from an egg, and a new
-egg arrives as the family grows. Nothing dies, and a week away costs nothing.
+**Eleven small games, played in the island** — `SUPER + G` opens a shelf, and
+the island becomes the board. **A family of five small creatures lives on the
+bar**: one out at a time, earning levels from being fed and played with, each
+hatched from an egg. Nothing dies, and a week away costs nothing.
 
 ## And the rest
 
@@ -225,7 +196,9 @@ egg arrives as the family grows. Nothing dies, and a week away costs nothing.
   then whatever else is open.
 - **Every key is on one sheet** — `SUPER + H` turns the island into all of them.
 
-## Components
+<details>
+<summary><b>Components</b></summary>
+<br>
 
 | | | |
 |---|---|---|
@@ -250,6 +223,8 @@ egg arrives as the family grows. Nothing dies, and a week away costs nothing.
 | 🎧 | Player | [Spotify](https://www.spotify.com) · [spicetify](https://spicetify.app) |
 | 🌐 | Browser | [Zen](https://zen-browser.app) |
 | 🔑 | Login screen | [SDDM](https://github.com/sddm/sddm) |
+
+</details>
 
 ## Installation
 
