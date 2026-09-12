@@ -33,9 +33,9 @@
 The name is the technique the wallpapers are painted in: paint laid on thick
 enough to keep the mark of the brush. It is a shell first and a dotfiles
 repository second — `home/.config/quickshell` is most of the code, and the rest
-of `home/` is the desk it sits on: the terminal, the prompt, two editors, two
+of `home/` is the desk around it: the terminal, the prompt, two editors, two
 file managers, a browser, a chat client, the login screen. **Change the
-wallpaper and all of it follows**, down to the folders in the file manager.
+wallpaper and all of it follows.**
 
 Everything in these pictures is the real shell, photographed.
 
@@ -46,16 +46,11 @@ Everything in these pictures is the real shell, photographed.
 </p>
 
 **The island is one object that changes shape.** A black capsule in the middle
-of the bar rests on the time, and everything else happens by it turning into
-something: the glance when the pointer rests on it, the control centre when it
-is clicked, the launcher, the overview, a notification, a game. Each is the
-size of what is in it, so a list of networks opens as a list and not as a
-control centre with a list inside it — and no panel has a title or a close
-button: what opened it closes it.
-
-What is running sits either side of the time — a track, a countdown, a take
-being recorded — and every module on the bar opens into the island rather than
-into a popup of its own.
+of the bar rests on the time and turns into everything else: the glance under
+the pointer, the control centre, the launcher, the overview, a notification, a
+game — each the size of what is in it, with no title and no close button. What
+is running sits either side of the time, and every module on the bar opens into
+the island rather than into a popup of its own.
 
 <p align="center">
   <img src=".github/assets/island-details.jpg" alt="Module details in the island: the player, the battery, Claude Code's usage, the processor and memory, the recorder, the Wi-Fi list, the weather, the pet, the volume, the month with task dots, the tasks, a countdown and the GitHub wall" width="100%">
@@ -67,15 +62,11 @@ into a popup of its own.
   <img src=".github/assets/bar-styles.jpg" alt="The same bar in its three styles: grouped round the island, spread to the two edges, and everything inside one capsule" width="100%">
 </p>
 
-**Three styles, one layout.** The two sides are arranged by dragging pieces out
-of a catalogue onto a picture of the bar, and then drawn grouped round the
-island, spread to the edges, or all inside one capsule. Nothing on it moves by
-itself: an item is where you put it.
-
-**Every module reads the same way, and it is two settings for the whole bar**:
-its symbol or its ring — the charge, the volume, the countdown as a gauge —
-with its figure beside it always, never, or only under the pointer. A piece
-can be given a look of its own; the rest follow.
+**Three styles, one layout.** Pieces are dragged out of a catalogue onto a
+picture of the bar, then drawn grouped round the island, spread to the edges, or
+all inside one capsule. Each shows its symbol or its ring, with its figure
+always, never or under the pointer — two settings for the whole bar, and any
+piece can have a look of its own.
 
 <p align="center">
   <img src=".github/assets/bar-modules.jpg" alt="A bar carrying every module, shown four ways: the symbol, the symbol and its figure, the ring, the ring and its figure" width="100%">
@@ -87,13 +78,10 @@ can be given a look of its own; the rest follow.
   <img src=".github/assets/control-centre.jpg" alt="The control centre rearranged — the signature block, the player, a clock, the month, toggles, the pet, a note, the tasks, the weather — and the same panel being arranged, with the tray of blocks under it and the clock's inspector open" width="100%">
 </p>
 
-**A grid you arrange, six columns by eight rows.** The toggles, the sliders,
-the player, the weather, the month, the notifications, a clock, the pet, a
-note, the tasks and the repository's signature are blocks, dragged to a cell
-and given one of the sizes they have a face for. The toggles are one block with
-pages; which tiles it carries, and in what order, is that block's own.
-Arranging happens on the panel itself, with a tray of live miniatures hanging
-under the island — the same way the widgets on the wallpaper are arranged.
+**A grid you arrange, six columns by eight rows.** Toggles, sliders, the
+player, the weather, the month, notifications, a clock, the pet, a note and the
+tasks are blocks, dragged from a tray of live miniatures under the island and
+given one of the sizes they have a face for.
 
 ## The launcher
 
@@ -102,18 +90,10 @@ under the island — the same way the widgets on the wallpaper are arranged.
 </p>
 
 **The first character says what the field is for.** Plain text searches
-applications, `=` calculates and Enter copies the answer, `@` finds an open
-window, `!` starts a countdown, `'` hands back something copied earlier, and
-`>` is the shell itself — every panel, the settings, the jobs the control
-centre does in one press, and the other sigils by name. Nothing is guessed, so
-`100` is a search until you ask for a sum.
-
-**It offers what you actually use.** Launches are counted with a month's
-half-life, and what is kept on the dock leads until something has been used
-more — the dock is the favourites list, so there is no second one. The
-clipboard history is one of these modes and nothing else: `SUPER + V`,
-type to filter, Enter to copy back, `SHIFT + Delete` to forget. A copied image
-is drawn in its row, and what a password manager copies is never kept.
+applications, `=` calculates, `@` finds an open window, `!` starts a countdown,
+`'` is the clipboard history, and `>` is the shell itself — every panel and
+setting by name. Applications are ranked by what you actually launch, with the
+dock's favourites first.
 
 ## The desktop
 
@@ -121,29 +101,19 @@ is drawn in its row, and what a password manager copies is never kept.
   <img src=".github/assets/desktop-themes.jpg" alt="The same wall of widgets split down the middle: Modern on the left, figures with captions; Analogue on the right, a thermometer, a wall calendar, a battery cell, a knob, gauges, a parcel, a joystick" width="100%">
 </p>
 
-**Any module can live on the wallpaper**, on a grid whose street is the
-compositor's own window gap, in four shapes — a square, a card, a large square
-and a band — each saying a little more than the last. Nothing overlaps: a widget
-dropped on an occupied square goes to the nearest free one.
+**Any module can live on the wallpaper**, on a grid, in four shapes: a square,
+a card, a large square and a band. Right-click the wallpaper to arrange — a tray
+of every module slides up, a corner is pulled for another shape, and a click
+opens that widget's own look.
 
-**Two themes on the same modules.** *Modern* is a figure with a caption, every
-face on one grid so six of them read as a set. *Analogue* draws each module as
-an object you read by where something is — a clock with hands, the sky beside a
-thermometer, a leaf off a wall calendar, a battery that fills, a fuel gauge, a
-record that turns while it plays, an hourglass, a parcel with the count on its
-label. The theme is one setting for the desktop and a choice per widget, so a
-dial can sit beside a modern battery.
+**Two themes on the same modules.** *Modern* is a figure with a caption;
+*Analogue* draws each module as an object — a clock with hands, a thermometer, a
+wall calendar, a record that turns while it plays, an hourglass. The theme is
+one setting for the desk and a choice per widget.
 
 <p align="center">
   <img src=".github/assets/desktop-styles.jpg" alt="The same five widgets in four styles: a capsule, the accent as a ground, an outline, and bare contents on the painting" width="100%">
 </p>
-
-Arranging is done on the picture: the right button on the wallpaper opens a
-menu, a tray of every module slides up, a corner is pulled for another shape,
-and a click opens a card with that widget's own look. The widgets draw in the
-desk's palette like every capsule on the bar — except the GitHub wall, which
-stays grey-to-green because a contribution graph is green the way a low battery
-is red.
 
 ## Notes and tasks
 
@@ -151,43 +121,13 @@ is red.
   <img src=".github/assets/notes-and-tasks.jpg" alt="The deck of pastel notes in handwriting, one note open with the island become yellow paper, the kanban board with three lanes, and a task open with its day and lane" width="100%">
 </p>
 
-**A note is paper**: a pastel square, a title, and the body in handwriting,
-`[ ]` and `[x]` drawn as boxes. `SUPER + S` opens the deck with New under the
-ring, and an open note turns the island into the sheet. On the wallpaper a note
-sits on a square, or stacks with others along an edge as tabs that peek out
-under the pointer.
+**A note is paper**: a pastel square with a title and the body in handwriting.
+`SUPER + S` opens the deck; on the wallpaper a note sits on a square, or stacks
+with others along an edge as tabs that peek out under the pointer.
 
 **A board for what has to be done.** `SUPER + K` is to do, doing, done, with
-cards dragged between the lanes. A task is a line, whatever else there is to
-say, a day and a lane — and the days show up as dots under the month wherever a
-month is drawn, a finished task staying on its day, struck through. Notes and
-tasks never read each other: a note has no state and no date.
-
-## The arcade
-
-<p align="center">
-  <img src=".github/assets/arcade.jpg" alt="The arcade shelf, and eleven games in the island: Tetris, Whack-a-Mole, Solitaire, Space Blaster, Target Smash, Snake Sprint, 2048 Mini, Lights Out, Flood Colors, Hextris and Bot Bash" width="100%">
-</p>
-
-**Eleven small games, played in the island.** `SUPER + G` opens a shelf; slide
-to a card and the island becomes that game's board, at its own size, with the
-keyboard in it. One best per game is kept, and every game is drawn in the
-palette's own tints, so the arcade follows the wallpaper like everything else.
-
-## The pets
-
-<p align="center">
-  <img src=".github/assets/pets.jpg" alt="Five species — Dot, Sprout, Ember, Sol and Drift — as an egg, hatched, with their ears at level five and a star at level fifteen, and the five moods: beaming, content, peckish, lonely and asleep" width="100%">
-</p>
-
-**A family of five small creatures lives on the bar**, and nothing in it is ever
-lost. One is out at a time and earns levels from being fed, played with and
-kept where it can see you; the rest sleep on the shelf and wake exactly as they
-were left. Each starts as an egg speckled in the coat it will hatch into, earns
-its species' ears at level five and a star at fifteen, and the family grows by
-one egg each time the levels across it cross a milestone — rolled from the
-species still missing, so the last egg is always the one you do not have. There
-is no death, and no punishment for a week away.
+cards dragged between the lanes, and a task's day shows as a dot under the
+month wherever a month is drawn.
 
 ## One palette, everywhere
 
@@ -195,21 +135,14 @@ is no death, and no punishment for a week away.
   <img src=".github/assets/repaint.gif" alt="The wallpaper changing three times, and the bar, the widgets, the terminal and the system monitor repainting with each one" width="100%">
 </p>
 
-**The palette comes out of the painting.** Pick a wallpaper and its colours are
-extracted and pushed everywhere at once: the island and its panels, the widgets,
-kitty and the prompt, btop, cava, yazi and its preview, neovim while you are
-typing in it, VSCodium, the GTK and Qt windows, KDE's applications, Thunar and
-the colour of its folders, Vesktop, Zen's frame, Spotify through spicetify, the
-pointer, and the greeting's pixel art. Or pick one of nine palettes instead.
+**The palette comes out of the painting.** Pick a wallpaper and its colours
+reach everything at once: the island and the widgets, the terminal and the
+prompt, btop, cava, yazi, neovim, VSCodium, the GTK, Qt and KDE windows, Thunar
+down to its folders, Vesktop, Zen and Spotify. Or pick one of nine palettes
+instead. The desk comes with forty paintings, in the style it is named after.
 
 <p align="center">
   <img src=".github/assets/appearance.jpg" alt="The appearance panel: a strip of the paintings on SUPER + T, and a strip of the palettes under it on SUPER + SHIFT + T" width="100%">
-</p>
-
-The desk comes with forty paintings, in the style it is named after:
-
-<p align="center">
-  <img src=".github/assets/wallpapers.jpg" alt="All forty wallpapers: cars, cats, coasts, a tiger in the snow, a pagoda under Mount Fuji, a Roman legion, a private jet" width="100%">
 </p>
 
 ## The terminal
@@ -218,11 +151,9 @@ The desk comes with forty paintings, in the style it is named after:
   <img src=".github/assets/terminal.jpg" alt="kitty tiled three ways in the palette of a painting of a castle under a full moon: yazi previewing a wallpaper, a bonsai growing, and neovim editing the island's QML" width="100%">
 </p>
 
-The terminal wears the island's black with the wallpaper's colour in it, over a
-blurred desk. The prompt is laid out like the bar — identity and place on the
-left, status on the right, and nothing at all when there is nothing to say —
-and `fa` greets you with fastfetch beside one of four animated scenes, drawn in
-pixel art out of the current palette:
+The terminal wears the island's black with the wallpaper's colour in it. The
+prompt is laid out like the bar, and `fa` greets you with fastfetch beside one
+of four animated scenes, drawn in pixel art out of the current palette:
 
 <table align="center">
   <tr>
@@ -233,35 +164,17 @@ pixel art out of the current palette:
   </tr>
 </table>
 
-`matrix`, `bonsai`, `clock` and `asciiquarium` draw in the terminal's own
-sixteen colours, so the push that repaints kitty repaints them mid-frame.
-
-## Every other window
-
-<p align="center">
-  <img src=".github/assets/windows.jpg" alt="VSCodium and Thunar side by side, both wearing the green of a painting of cliffs, Thunar's folders tinted to match" width="100%">
-</p>
-
-Windows from other toolkits follow the palette too, each through whatever its
-toolkit exposes: a generated `gtk.css` for GTK, a platform theme
-and `kdeglobals` for Qt and KDE, a whole colour-theme extension for VSCodium, a
-user stylesheet for Vesktop and for Zen, an icon theme that re-points Papirus's
-folders at the nearest of its colours. Right-click a picture in Thunar and **Set
-as Wallpaper** repaints the whole desk from there.
-
 ## Lock and login
 
 <p align="center">
   <img src=".github/assets/lock-and-login.jpg" alt="The lock screen over the blurred desk, and the SDDM login screen over a painting of brush strokes — the same clock, the same face, the same field" width="100%">
 </p>
 
-**The shell locks the session itself**, through the compositor's own
-ext-session-lock, so the desk stays on screen behind the lock, blurred. It is
-its own idle daemon too — lock, screen off and sleep, each able to be told
-never, and a film playing holds all three off. **The login screen is the lock
-screen with the desk taken away**: an SDDM theme with the same clock, the same
-face and the same field, so locking the machine and booting it look like one
-design.
+**The shell locks the session itself**, so the desk stays on screen behind the
+lock, blurred, and it is its own idle daemon — lock, screen off and sleep, held
+off while a film plays. **The login screen is the lock screen with the desk
+taken away**: an SDDM theme with the same clock, the same face and the same
+field.
 
 ## Settings
 
@@ -269,22 +182,33 @@ design.
   <img src=".github/assets/settings.jpg" alt="Four pages of the settings window: the bar arranged on a picture of it, the desktop's look, the appearance with the wallpaper transitions and the greeting scenes, and every key binding" width="100%">
 </p>
 
-**Settings is the one panel that is not the island** — an ordinary window, so
-Hyprland moves it, resizes it and closes it like anything else, while the island
-visibly reacts to what is being changed. Where an option is a shape, the
-control is the shape: a real chip, a real bar, the real clock in the format on
-offer. A setting made meaningless by another one stays where it is, dimmed,
-with a line saying which switch did it. The window also speaks Spanish.
+**Settings is the one panel that is not the island** — an ordinary window,
+while the island reacts to what is being changed. Where an option is a shape,
+the control is the shape: a real chip, a real bar, the real clock. The window
+also speaks Spanish.
 
-**Profiles** keep whole desks under names — the bar, the widgets, the dock,
-the look, the keys, and the wallpaper with its palette — and switch between
-them from System. The one in use saves itself as you go, like VS Code's. A
-profile exports to a plain JSON file and imports on another machine; your
-screens, your name and the language stay with the machine. Three come with the
-desk, one for each style of bar — *Moon castle*, one capsule over analogue
-objects; *Fuji*, grouped round a notch; *Night bay*, spread under a wall of
-widgets. A fresh install starts on Moon castle, and the other two are on the
-list.
+**Profiles** keep whole desks under names — the bar, the widgets, the dock, the
+look, the keys and the wallpaper — and export to a file you can import on
+another machine. Three come with it: *Moon castle*, *Fuji* and *Night bay*.
+
+## The arcade
+
+<p align="center">
+  <img src=".github/assets/arcade.jpg" alt="The arcade shelf, and eleven games in the island: Tetris, Whack-a-Mole, Solitaire, Space Blaster, Target Smash, Snake Sprint, 2048 Mini, Lights Out, Flood Colors, Hextris and Bot Bash" width="100%">
+</p>
+
+**Eleven small games, played in the island.** `SUPER + G` opens a shelf; pick a
+card and the island becomes that game's board, drawn in the palette's own tints.
+
+## The pets
+
+<p align="center">
+  <img src=".github/assets/pets.jpg" alt="Five species — Dot, Sprout, Ember, Sol and Drift — as an egg, hatched, with their ears at level five and a star at level fifteen, and the five moods: beaming, content, peckish, lonely and asleep" width="100%">
+</p>
+
+**A family of five small creatures lives on the bar.** One is out at a time and
+earns levels from being fed and played with; each hatches from an egg, and a new
+egg arrives as the family grows. Nothing dies, and a week away costs nothing.
 
 ## And the rest
 
@@ -296,23 +220,10 @@ list.
   drag a window from one to another.
 - **One key to capture.** `SUPER + SHIFT + S` photographs the screen and lets
   you draw on the photograph — region, window or screen, as a picture or a
-  recording, saved, copied, annotated or read as text. There is nothing to
-  freeze, because what you are drawing on is already a picture.
+  recording, saved, copied, annotated or read as text.
 - **The dock** is a shelf on any edge but the top: the applications you keep,
-  then whatever else is open. A kept application that is running lights up in
-  its own place.
-- **Every key is on one sheet** — `SUPER + H` turns the island into all of
-  them, read from the compositor as it opens.
-- **The packages are a panel** — `SUPER + I` lists what is waiting to update,
-  what is installed and what a name finds, in the repositories and the AUR at
-  once; installing and updating open a terminal, because pacman asks questions.
-- **The screens are remembered by which screens they are.** Arrange them on a
-  canvas and the arrangement is kept for that set of monitors; close the lid
-  with another one connected and the laptop's panel goes dark with its
-  workspaces moved.
-- **A night light, a colour picker, a recorder, the weather, updates, Claude
-  Code's usage** — each a module, a widget, or a tile, and each missing program
-  takes its own control away rather than failing under the finger.
+  then whatever else is open.
+- **Every key is on one sheet** — `SUPER + H` turns the island into all of them.
 
 ## Components
 
@@ -352,10 +263,9 @@ cd ~/impasto
 ./setup install
 ```
 
-In order, it installs the packages, the user folders,
-oh-my-zsh and its two plugins, everything in `home/` copied into your home,
-everything in `system/` copied into `/`, and the two Hyprland plugins. It asks
-for your password through sudo — for pacman, and for the copy into `/`.
+It installs the packages, oh-my-zsh, everything in `home/` into your home and
+everything in `system/` into `/`, and the two Hyprland plugins, asking for your
+password through sudo for pacman and for the copy into `/`.
 
 | Flag | |
 |---|---|
@@ -373,16 +283,10 @@ for your password through sudo — for pacman, and for the copy into `/`.
 ```
 
 **Nothing is linked: `setup` copies**, and remembers what it wrote. A file of
-yours already in the way the first time is moved to
-`~/.local/state/impasto/backups/` before anything is written. A file you edit
-afterwards is yours: an update leaves it where it is and puts the new version
-beside it as `<name>.new`. And a file `setup` did not write — the themes the
-shell generates, anything else of yours — is never touched, by an update or by
-`uninstall`.
-
-**Editing the repository?** A change is not on the desk until it is copied:
-`./setup sync` does it once, and `./setup sync --watch` keeps doing it on every
-save (it wants `inotify-tools`).
+yours already in the way is moved to `~/.local/state/impasto/backups/` first; a
+file you edit afterwards is left alone, with the new version beside it as
+`<name>.new`. Editing the repository itself? `./setup sync` copies it onto the
+desk, and `./setup sync --watch` keeps doing it on every save.
 
 <details>
 <summary><b>What every package is for</b></summary>
@@ -529,8 +433,7 @@ firmware's own forced power-off.
 ## Keys
 
 Every key belongs to a profile: Settings → Keys changes any of them, the
-compositor's included, and switching profile switches them all. The three
-example profiles use the common Hyprland conventions, and a few are worth
+compositor's included, and switching profile switches them all. A few worth
 knowing first:
 
 - <kbd>SUPER</kbd> <kbd>Return</kbd> a terminal, <kbd>SUPER</kbd> <kbd>Space</kbd>
@@ -541,68 +444,16 @@ knowing first:
   locks
 - <kbd>SUPER</kbd> <kbd>H</kbd> every other key, on the island
 
-## Structure
-
-`home/` is `$HOME` as it is and `system/` is `/` as it is, so where a file sits
-in the tree is where it lands. Every file written for this repository opens with
-the same 76-column header, carrying its name, what it is, and this repository's
-address; `./setup check` is what CI runs over all of it.
-
-<details>
-<summary><b>The tree</b></summary>
-<br>
-
-```
-impasto/
-├── setup                               the installer: install, update, sync, uninstall…
-├── packages/                           pacman.txt · aur.txt — every package the desk runs
-├── home/                               $HOME, as it is
-│   ├── .config/
-│   │   ├── hypr/
-│   │   │   ├── hyprland.lua            entry point
-│   │   │   └── modules/                monitors, look, input, keybinds…
-│   │   ├── quickshell/
-│   │   │   ├── shell.qml               entry point
-│   │   │   ├── theme/                  tokens and palettes
-│   │   │   ├── services/               state and processes
-│   │   │   ├── components/             reusable atoms
-│   │   │   ├── bar/                    the bar, its modules and the panels
-│   │   │   ├── settings/               the settings window and its sections
-│   │   │   ├── desktop/                widgets on the wallpaper, and their faces
-│   │   │   ├── deck/                   the notes stacked along the edges
-│   │   │   ├── dock/                   the shelf on the edge, and what is open
-│   │   │   ├── capture/                the screen held still, and the box on it
-│   │   │   ├── lock/                   the session held, through the compositor
-│   │   │   └── scripts/                Python backends
-│   │   ├── kitty/                      terminal: window, cursor, palette
-│   │   ├── btop/                       system monitor, themed by the push
-│   │   ├── cava/                       the visualiser, one line and a theme
-│   │   ├── yazi/                       file manager: flavour, openers, keys
-│   │   ├── nvim/                       the editor: options, theme, plugins
-│   │   ├── gtk-3.0/ · gtk-4.0/         the GTK windows, coloured by the push
-│   │   ├── fastfetch/                  the greeting, beside an animated scene
-│   │   └── starship.toml               the prompt itself
-│   ├── .local/share/
-│   │   ├── wallpapers/                 the paintings
-│   │   └── impasto/                    the palette board, its paint, the example profiles
-│   └── .zshrc                          plugins, path, prompt and tools
-└── system/                             /, as it is
-    ├── etc/sddm.conf.d/                where the machine keeps a face
-    └── usr/share/sddm/themes/impasto/
-        ├── Main.qml                    the login screen
-        └── components/                 its tokens, its capsules, its pickers
-```
-
-</details>
-
 ## Credits
 
-The island's architecture is borrowed from these, which are worth your time
-whether or not you use this repository. No code was copied from them; what
-carried over are ideas — one file per island state, one transient signal for
-every ephemeral event, input debounced to one frame, and a capture that
-photographs the screen and draws the selection on the photograph.
+These are worth your time whether or not you use this repository. No code was
+copied from any of them; what carried over from the shells are ideas — one file
+per island state, one transient signal for every ephemeral event, input
+debounced to one frame, and a capture that photographs the screen and draws the
+selection on the photograph.
 
+- [saneAspect](https://www.youtube.com/@saneAspect) — the Hyprland setups on
+  YouTube that started all this
 - [Tide-island](https://github.com/enhaoswen/Tide-island) — the closest thing to
   a complete dynamic island for Hyprland
 - [ChillPill-Shell](https://github.com/LUCKYS1NGHH/ChillPill-Shell) — a dynamic
