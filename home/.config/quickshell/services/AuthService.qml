@@ -19,6 +19,7 @@ Singleton {
     property bool ready: false
     property bool loggingOut: false
     property string pendingLogin: ""
+    property string logoutError: ""
     property int loginChecks: 0
     property int logoutChecks: 0
 
@@ -55,6 +56,7 @@ Singleton {
             return
 
         root.loggingOut = true
+        root.logoutError = ""
         root.logoutChecks = 0
         root.logoutProcess.command = ["codex", "logout"]
         root.logoutProcess.running = true
@@ -84,6 +86,8 @@ Singleton {
             root.refresh()
             root.logoutChecks += 1
             if (!root.chatgptAuthenticated || root.logoutChecks >= 20) {
+                if (root.chatgptAuthenticated)
+                    root.logoutError = "Could not verify Codex logout."
                 stop()
                 root.loggingOut = false
             }
@@ -91,8 +95,13 @@ Singleton {
     }
 
     readonly property Process logoutProcess: Process {
-        onExited: {
+        onExited: exitCode => {
             root.refresh()
+            if (exitCode !== 0) {
+                root.logoutError = "Could not log out of Codex."
+                root.loggingOut = false
+                return
+            }
             root.logoutPoller.start()
         }
     }

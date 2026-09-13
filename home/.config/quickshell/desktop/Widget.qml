@@ -141,6 +141,17 @@ Item {
         enabled: !root.editing
     }
 
+    MouseArea {
+        anchors.fill: parent
+        visible: !root.editing && root.moduleId === "chatgpt"
+                && !AuthService.chatgptAuthenticated
+        enabled: visible
+        z: 2
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onClicked: AuthService.login("chatgpt")
+    }
+
     // Tasks are useful on the desktop at a glance, but their board lives in
     // the island. Keep that action visible on every task face instead of
     // requiring the user to open another module first.

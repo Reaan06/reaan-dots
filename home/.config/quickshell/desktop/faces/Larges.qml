@@ -37,6 +37,7 @@ Item {
         stats: statsLarge,
         media: mediaLarge,
         claude: claudeLarge,
+        chatgpt: chatgptLarge,
         notes: notesLarge,
         tasks: tasksLarge
     })
@@ -224,6 +225,7 @@ Item {
         id: claudeLarge
 
         WidgetFace {
+            id: claudeFace
 
             ink: root.ink
             label: "Claude"
@@ -243,7 +245,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.width
                     spacing: 16
-                    visible: ClaudeService.available
+                    visible: ClaudeService.available || !AuthService.claudeAuthenticated
 
                     // The percentage comes from the account's response headers,
                     // the same figure as the usage page. Without the account,
@@ -303,6 +305,44 @@ Item {
                         font.pixelSize: Theme.fontSizeSmall
                         color: root.ink.muted
                     }
+
+                 }
+             ]
+
+             MouseArea {
+                 parent: claudeFace
+                 visible: !AuthService.claudeAuthenticated
+                 anchors.fill: parent
+                 cursorShape: Qt.PointingHandCursor
+                 onClicked: AuthService.login("claude")
+             }
+         }
+    }
+
+    Component {
+        id: chatgptLarge
+
+        WidgetFace {
+            id: chatgptFace
+            ink: root.ink
+            label: "ChatGPT"
+            reading: AuthService.chatgptAuthenticated ? "Authenticated" : "Not authenticated"
+            note: AuthService.chatgptAuthenticated ? "Codex account" : "local Codex login required"
+
+            ChatGPTMark {
+                anchors.centerIn: parent
+                width: 34
+                height: 34
+                color: root.ink.text
+            }
+
+            body: [
+                MouseArea {
+                    parent: chatgptFace
+                    visible: !AuthService.chatgptAuthenticated
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: AuthService.login("chatgpt")
                 }
             ]
         }

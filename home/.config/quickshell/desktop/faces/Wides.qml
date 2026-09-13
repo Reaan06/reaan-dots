@@ -43,6 +43,7 @@ Item {
         github: githubWide,
         stats: statsWide,
         claude: claudeWide,
+        chatgpt: chatgptWide,
         timer: timerWide,
         pet: petWide,
         media: mediaWide,
@@ -221,6 +222,7 @@ Item {
         id: claudeWide
 
         WidgetFace {
+            id: claudeFace
 
             ink: root.ink
             label: "Claude"
@@ -246,10 +248,11 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     width: parent.width
                     spacing: 8
-                    visible: ClaudeService.available
+                    visible: ClaudeService.available || !AuthService.claudeAuthenticated
 
                     UsageBar {
 
+                        visible: ClaudeService.available
                         trackColor: root.ink.raised
                         width: parent.width
                         progress: ClaudeService.gauge
@@ -257,6 +260,7 @@ Item {
                     }
 
                     Text {
+                        visible: ClaudeService.available
                         width: parent.width
                         text: ClaudeService.resetsIn
                         horizontalAlignment: Text.AlignRight
@@ -265,8 +269,84 @@ Item {
                         font.pixelSize: Theme.fontSizeSmall
                         color: root.ink.muted
                     }
-                }
-            ]
+
+                 }
+             ]
+
+             MouseArea {
+                 parent: claudeFace
+                 visible: !AuthService.claudeAuthenticated
+                 anchors.fill: parent
+                 cursorShape: Qt.PointingHandCursor
+                 onClicked: AuthService.login("claude")
+             }
+         }
+    }
+
+    Component {
+        id: chatgptWide
+
+        WidgetFace {
+            id: chatgptFace
+            ink: root.ink
+            label: "ChatGPT"
+            reading: !AuthService.chatgptAuthenticated ? "Not authenticated"
+                : CodexService.available ? `${CodexService.primaryWindowLabel} ${Math.round(CodexService.primaryUsedPercent)}%`
+                : "Authenticated"
+            note: !AuthService.chatgptAuthenticated ? "local Codex login required"
+                : CodexService.available && CodexService.secondaryAvailable
+                ? `${CodexService.secondaryWindowLabel} ${Math.round(CodexService.secondaryUsedPercent)}%`
+                : CodexService.available ? "week unavailable"
+                : "Codex account"
+            extraShare: 0.42
+
+            ChatGPTMark {
+                anchors.centerIn: parent
+                width: 32
+                height: 32
+                color: root.ink.text
+            }
+
+             extra: [
+                 Row {
+                     anchors.verticalCenter: parent.verticalCenter
+                     width: parent.width
+                     spacing: 10
+
+                     QuotaRing {
+                         width: Math.min(70, (parent.width - 10) / 2)
+                         height: width
+                         usedPercent: CodexService.primaryUsedPercent
+                         available: AuthService.chatgptAuthenticated && CodexService.available
+                         label: CodexService.primaryWindowLabel || "5h"
+                         trackColor: root.ink.dim
+                         fillColor: root.ink.accent
+                         textColor: root.ink.text
+                         labelColor: root.ink.muted
+                     }
+
+                     QuotaRing {
+                         width: Math.min(70, (parent.width - 10) / 2)
+                         height: width
+                         usedPercent: CodexService.secondaryUsedPercent
+                         available: AuthService.chatgptAuthenticated && CodexService.available
+                             && CodexService.secondaryAvailable
+                         label: CodexService.secondaryWindowLabel || "week"
+                         trackColor: root.ink.dim
+                         fillColor: root.ink.text
+                         textColor: root.ink.text
+                         labelColor: root.ink.muted
+                     }
+                 }
+             ]
+
+            MouseArea {
+                parent: chatgptFace
+                visible: !AuthService.chatgptAuthenticated
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: AuthService.login("chatgpt")
+            }
         }
     }
 
