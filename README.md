@@ -29,6 +29,74 @@
   <img src=".github/assets/hero.jpg" alt="The desk: the island with a track playing, widgets down the right, a note deck on the left edge, a terminal with the lava lamp greeting, and the dock" width="100%">
 </p>
 
+## Installation
+
+Arch Linux, and Hyprland 0.56 or newer (tested on 0.56.2), configured in Lua.
+Install Herdr first; its installer requires `curl` and `awk` and installs the
+binary under `~/.local/bin`:
+
+```bash
+curl -fsSL https://herdr.dev/install.sh | sh
+```
+
+Then run Impasto from a terminal inside the Hyprland session — the plugins are
+built against the compositor that is running:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Reaan06/reaan-dots/main/install.sh | bash -s -- --skip-system --skip-plugins
+```
+
+Kitty adds `~/.local/bin` to its own environment before launching Herdr, so
+graphically launched Kitty sessions can find the Herdr binary without relying
+on Fish having already initialised. Fish adds the same directory for commands
+started inside its interactive panes.
+
+The command clones Impasto into `~/reaan-dots` and runs `setup install`. Set
+`IMPASTO_DIR` to choose another destination. Forward any safe setup flags after
+`--`, such as `--skip-system` or `--skip-plugins`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Reaan06/reaan-dots/main/install.sh | bash -s -- --skip-system
+```
+
+Alternatively, clone it yourself and run the installer from the checkout:
+
+```bash
+git clone https://github.com/Reaan06/reaan-dots.git ~/reaan-dots
+cd ~/reaan-dots
+./install.sh
+```
+
+It installs the packages, everything in `home/` into your home and everything
+in `system/` into `/`, and the two Hyprland plugins, asking for your password
+through sudo for pacman and for the copy into `/`. Kitty launches Herdr as its
+terminal client; Herdr panes use Fish as their interactive shell.
+
+| Flag | |
+|---|---|
+| `--skip-packages` | install nothing; copy and build only |
+| `--skip-system` | leave `/` alone — no login screen, and no password for it |
+| `--skip-plugins` | no shake to find, no glass |
+| `--aur-helper yay\|paru` | which helper builds the AUR half — built from the AUR if you have neither |
+| `--noconfirm` | take the default at every question |
+| `-n`, `--dry-run` | say what would happen, and do none of it |
+
+```bash
+./setup update       # git pull, then install again — the same flags
+./setup uninstall    # remove everything setup installed that you have not edited since
+./setup help         # every verb and flag
+```
+
+**Nothing is linked: `setup` copies**, and remembers what it wrote. A file of
+yours already in the way is moved to `~/.local/state/impasto/backups/` first; a
+file you edit afterwards is left alone, with the new version beside it as
+`<name>.new`. Editing the repository itself? `./setup sync` copies it onto the
+desk, and `./setup sync --watch` keeps doing it on every save.
+
+Every package is listed in `packages/pacman.txt` and `packages/aur.txt`, grouped
+by what it is for; an optional one that is missing takes its own control away
+rather than failing.
+
 The name is the technique the wallpapers are painted in: paint laid on thick
 enough to keep the mark of the brush. It is a shell first and a dotfiles
 repository second — `home/.config/quickshell` is most of the code, and the rest
@@ -151,61 +219,6 @@ clock, the same face and the same field.
 each option is drawn as the thing it changes, and profiles keep whole desks
 under names: *Moon castle*, *Fuji* and *Night bay* come with it.
 
-## Installation
-
-Arch Linux, and Hyprland 0.56 or newer (tested on 0.56.2), configured in Lua.
-Run it from a terminal inside the Hyprland session — the plugins are built
-against the compositor that is running:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Reaan06/reaan-dots/main/install.sh | bash -s -- --skip-system --skip-plugins
-```
-
-The command clones Impasto into `~/reaan-dots` and runs `setup install`. Set
-`IMPASTO_DIR` to choose another destination. Forward any safe setup flags after
-`--`, such as `--skip-system` or `--skip-plugins`:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/Reaan06/reaan-dots/main/install.sh | bash -s -- --skip-system
-```
-
-Alternatively, clone it yourself and run the installer from the checkout:
-
-```bash
-git clone https://github.com/Reaan06/reaan-dots.git ~/reaan-dots
-cd ~/reaan-dots
-./install.sh
-```
-
-It installs the packages, oh-my-zsh, everything in `home/` into your home and
-everything in `system/` into `/`, and the two Hyprland plugins, asking for your
-password through sudo for pacman and for the copy into `/`.
-
-| Flag | |
-|---|---|
-| `--skip-packages` | install nothing; copy and build only |
-| `--skip-system` | leave `/` alone — no login screen, and no password for it |
-| `--skip-plugins` | no shake to find, no glass |
-| `--aur-helper yay\|paru` | which helper builds the AUR half — built from the AUR if you have neither |
-| `--noconfirm` | take the default at every question |
-| `-n`, `--dry-run` | say what would happen, and do none of it |
-
-```bash
-./setup update       # git pull, then install again — the same flags
-./setup uninstall    # remove everything setup installed that you have not edited since
-./setup help         # every verb and flag
-```
-
-**Nothing is linked: `setup` copies**, and remembers what it wrote. A file of
-yours already in the way is moved to `~/.local/state/impasto/backups/` first; a
-file you edit afterwards is left alone, with the new version beside it as
-`<name>.new`. Editing the repository itself? `./setup sync` copies it onto the
-desk, and `./setup sync --watch` keeps doing it on every save.
-
-Every package is listed in `packages/pacman.txt` and `packages/aur.txt`, grouped
-by what it is for; an optional one that is missing takes its own control away
-rather than failing.
-
 <details>
 <summary><b>Components</b></summary>
 <br>
@@ -217,8 +230,9 @@ rather than failing.
 | 🫧 | Glass on the windows | [hyprglass](https://github.com/hyprnux/hyprglass) |
 | 🐚 | Desktop shell | [Quickshell](https://quickshell.org) |
 | 🖼️ | Wallpaper daemon | [awww](https://github.com/LGFae/swww) |
-| 🖥️ | Terminal | [kitty](https://sw.kovidgoyal.net/kitty/) |
-| ⌨️ | Interactive shell | [zsh](https://www.zsh.org) · [oh-my-zsh](https://ohmyz.sh) |
+| 🖥️ | Outer terminal | [kitty](https://sw.kovidgoyal.net/kitty/) |
+| 🐑 | Terminal multiplexer/client | [Herdr](https://herdr.dev) |
+| ⌨️ | Interactive shell | [Fish](https://fishshell.com) |
 | ❯ | Prompt | [starship](https://starship.rs) |
 | 🎨 | Greeting | [fastfetch](https://github.com/fastfetch-cli/fastfetch) |
 | 📊 | System monitor | [btop](https://github.com/aristocratos/btop) |

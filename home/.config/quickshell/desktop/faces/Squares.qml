@@ -42,6 +42,7 @@ Item {
         github: githubSquare,
         stats: statsSquare,
         claude: claudeSquare,
+        chatgpt: chatgptSquare,
         timer: timerSquare,
         pet: petSquare,
         games: gamesSquare,
@@ -239,6 +240,7 @@ Item {
         id: claudeSquare
 
         WidgetFace {
+            id: claudeFace
 
             ink: root.ink
             label: "Claude"
@@ -254,6 +256,78 @@ Item {
                 width: 32
                 height: 32
                 color: root.ink.text
+            }
+
+            MouseArea {
+                parent: claudeFace
+                visible: !AuthService.claudeAuthenticated
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: AuthService.login("claude")
+            }
+        }
+    }
+
+    Component {
+        id: chatgptSquare
+
+        WidgetFace {
+            id: chatgptFace
+
+            ink: root.ink
+            label: "ChatGPT"
+            reading: !AuthService.chatgptAuthenticated ? "Not authenticated"
+                : CodexService.available ? `${CodexService.primaryWindowLabel} ${Math.round(CodexService.primaryUsedPercent)}%`
+                : "Authenticated"
+            note: !AuthService.chatgptAuthenticated ? "local Codex login required"
+                : CodexService.available && CodexService.secondaryAvailable
+                ? `${CodexService.secondaryWindowLabel} ${Math.round(CodexService.secondaryUsedPercent)}%`
+                : CodexService.available ? "week unavailable"
+                : "Codex account"
+
+             ChatGPTMark {
+                 anchors.centerIn: parent
+                 width: 32
+                 height: 32
+                 color: root.ink.text
+             }
+
+             body: Row {
+                 anchors.centerIn: parent
+                 spacing: 8
+
+                 QuotaRing {
+                     width: 48
+                     height: 48
+                     usedPercent: CodexService.primaryUsedPercent
+                     available: AuthService.chatgptAuthenticated && CodexService.available
+                     label: CodexService.primaryWindowLabel || "5h"
+                     trackColor: root.ink.dim
+                     fillColor: Theme.indicator
+                     textColor: root.ink.text
+                     labelColor: root.ink.muted
+                 }
+
+                 QuotaRing {
+                     width: 48
+                     height: 48
+                     usedPercent: CodexService.secondaryUsedPercent
+                     available: AuthService.chatgptAuthenticated && CodexService.available
+                         && CodexService.secondaryAvailable
+                     label: CodexService.secondaryWindowLabel || "week"
+                     trackColor: root.ink.dim
+                     fillColor: Theme.indicator
+                     textColor: root.ink.text
+                     labelColor: root.ink.muted
+                 }
+             }
+
+             MouseArea {
+                parent: chatgptFace
+                visible: !AuthService.chatgptAuthenticated
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                onClicked: AuthService.login("chatgpt")
             }
         }
     }
