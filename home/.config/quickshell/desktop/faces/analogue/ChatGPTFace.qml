@@ -12,14 +12,18 @@ Instrument {
 
     line: authenticated
         ? (available
-            ? `Session ${CodexService.resetsIn} · ${CodexService.compact(CodexService.blockTokens)} tokens`
+            ? `Session ${CodexService.primaryResetNote || "reset unavailable"} · ${Math.round(CodexService.primaryUsedPercent)}% used`
             : "Codex account authenticated")
         : "Codex account not authenticated"
     reading: authenticated
-        ? (available ? CodexService.compact(CodexService.blockTokens) + " tokens" : "Ready")
+        ? (available ? `${Math.round(CodexService.primaryUsedPercent)}% used` : "Ready")
         : "Login"
     note: authenticated
-        ? (available ? `Week: ${CodexService.compact(CodexService.weekTokens)} tokens` : "Codex authenticated")
+        ? (available
+            ? (CodexService.secondaryAvailable
+                ? `Week: ${Math.round(CodexService.secondaryUsedPercent)}% used · ${CodexService.secondaryResetNote || "reset unavailable"}`
+                : "Week quota unavailable")
+            : "Codex authenticated")
         : "ChatGPT login required"
     filled: authenticated
 

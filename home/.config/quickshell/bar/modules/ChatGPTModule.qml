@@ -12,6 +12,18 @@ Item {
 
     property bool compact: false
 
+    function resetText(timestamp: real, windowAvailable: bool): string {
+        const seconds = Number(timestamp)
+        if (!CodexService.available || !windowAvailable
+                || !Number.isFinite(seconds) || seconds <= 0)
+            return "Reset unavailable"
+
+        const date = new Date(seconds * 1000)
+        return Number.isNaN(date.getTime())
+            ? "Reset unavailable"
+            : `Resets ${date.toLocaleString()}`
+    }
+
     implicitWidth: holder.implicitWidth
     implicitHeight: holder.implicitHeight
 
@@ -119,35 +131,79 @@ Item {
                  Layout.alignment: Qt.AlignHCenter
                  spacing: 12
 
-                 QuotaRing {
-                     Layout.preferredWidth: 58
-                     Layout.preferredHeight: 58
-                     usedPercent: CodexService.primaryUsedPercent
-                     available: AuthService.chatgptAuthenticated && CodexService.available
-                     label: CodexService.primaryWindowLabel || "5h"
-                     trackColor: Theme.indicatorDim
-                     fillColor: Theme.indicator
-                 }
+                  ColumnLayout {
+                      Layout.preferredWidth: 82
+                      spacing: 4
 
-                 QuotaRing {
-                     Layout.preferredWidth: 58
-                     Layout.preferredHeight: 58
-                     usedPercent: CodexService.secondaryUsedPercent
-                     available: AuthService.chatgptAuthenticated && CodexService.available
-                         && CodexService.secondaryAvailable
-                     label: CodexService.secondaryWindowLabel || "week"
-                     trackColor: Theme.indicatorDim
-                     fillColor: Theme.indicator
-                 }
-              }
+                      QuotaRing {
+                          Layout.alignment: Qt.AlignHCenter
+                          Layout.preferredWidth: 58
+                          Layout.preferredHeight: 58
+                          usedPercent: CodexService.primaryUsedPercent
+                          available: AuthService.chatgptAuthenticated && CodexService.available
+                          label: CodexService.primaryWindowLabel || "5h"
+                          trackColor: Theme.indicatorDim
+                          fillColor: Theme.indicator
+                      }
 
-             PillButton {
+                      Text {
+                          Layout.fillWidth: true
+                          text: root.resetText(CodexService.primaryResetAt, true)
+                          horizontalAlignment: Text.AlignHCenter
+                          wrapMode: Text.Wrap
+                          font.family: Theme.fontFamily
+                          font.pixelSize: Theme.fontSizeLabel
+                          color: Theme.textMuted
+                      }
+                  }
+
+                  ColumnLayout {
+                      Layout.preferredWidth: 82
+                      spacing: 4
+
+                      QuotaRing {
+                          Layout.alignment: Qt.AlignHCenter
+                          Layout.preferredWidth: 58
+                          Layout.preferredHeight: 58
+                          usedPercent: CodexService.secondaryUsedPercent
+                          available: AuthService.chatgptAuthenticated && CodexService.available
+                              && CodexService.secondaryAvailable
+                          label: CodexService.secondaryWindowLabel || "week"
+                          trackColor: Theme.indicatorDim
+                          fillColor: Theme.indicator
+                      }
+
+                      Text {
+                          Layout.fillWidth: true
+                          text: root.resetText(CodexService.secondaryResetAt,
+                                               CodexService.secondaryAvailable)
+                          horizontalAlignment: Text.AlignHCenter
+                          wrapMode: Text.Wrap
+                          font.family: Theme.fontFamily
+                          font.pixelSize: Theme.fontSizeLabel
+                          color: Theme.textMuted
+                      }
+                  }
+               }
+
+              PillButton {
                  visible: AuthService.chatgptAuthenticated
                  enabled: !AuthService.loggingOut
                  text: "Log out of Codex"
                  Layout.alignment: Qt.AlignRight
-                 onClicked: AuthService.logout("chatgpt")
-             }
+                  onClicked: AuthService.logout("chatgpt")
+              }
+
+              Text {
+                  visible: AuthService.logoutError !== ""
+                  text: AuthService.logoutError
+                  color: Theme.indicatorBad
+                  font.family: Theme.fontFamily
+                  font.pixelSize: Theme.fontSizeSmall
+                  Layout.fillWidth: true
+                  horizontalAlignment: Text.AlignRight
+                  wrapMode: Text.Wrap
+              }
 
              // Only show the login prompt while the Codex account is unauthenticated.
             LoginPrompt {

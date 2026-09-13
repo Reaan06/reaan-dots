@@ -46,6 +46,11 @@ built against the compositor that is running:
 curl -fsSL https://raw.githubusercontent.com/Reaan06/reaan-dots/main/install.sh | bash -s -- --skip-system --skip-plugins
 ```
 
+Kitty adds `~/.local/bin` to its own environment before launching Herdr, so
+graphically launched Kitty sessions can find the Herdr binary without relying
+on Fish having already initialised. Fish adds the same directory for commands
+started inside its interactive panes.
+
 The command clones Impasto into `~/reaan-dots` and runs `setup install`. Set
 `IMPASTO_DIR` to choose another destination. Forward any safe setup flags after
 `--`, such as `--skip-system` or `--skip-plugins`:

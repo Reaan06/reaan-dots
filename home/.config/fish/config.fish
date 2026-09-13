@@ -9,7 +9,9 @@
 
 set -g fish_greeting ""
 
-# Keep local binaries first, followed by MATLAB installations when present.
+# Keep local binaries first for interactive Fish sessions. Kitty exports the
+# same path before launching Herdr, so graphical sessions do not depend on
+# this file having run first.
 set -gx PATH $HOME/.local/bin $PATH
 for matlab_bin in /usr/local/MATLAB/*/bin
     if test -d "$matlab_bin"
