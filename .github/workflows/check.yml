@@ -11,8 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Lua and zsh
-        run: sudo apt-get update && sudo apt-get install -y lua5.4 zsh
+      - name: Install Lua and Fish
+        run: sudo apt-get update && sudo apt-get install -y lua5.4 fish
 
-      - name: Verify Python, Lua, zsh, bash, JSON and TOML syntax
+      - name: Verify Python, Lua, Fish, Bash, JSON and TOML syntax
         run: ./setup check
