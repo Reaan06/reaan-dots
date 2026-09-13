@@ -1,7 +1,7 @@
 // ╭──────────────────────────────────────────────────────────────────────────╮
 // │                                                                          │
 // │   C O D E X   S E R V I C E                                            │
-// │   usage from the local SQLite database                          │
+// │   account quota from the Codex app-server                       │
 // │                                                                          │
 // │   github.com/andreumassanet/impasto                                      │
 // │                                                                          │
@@ -13,17 +13,14 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Codex token usage for the current five-hour block and the last seven
-// days, read from the local `state_5.sqlite` database.
+// Codex account quota for the primary five-hour block and secondary week,
+// read through the official Codex app-server protocol.
 //
-// `threads` table carries a `tokens_used` column per thread. We aggregate
-// by creation time to build block and week totals.
-//
-// Runs only while subscribed; the first read is a full scan.
+// Runs only while subscribed; refreshes are bounded by the helper process.
 Singleton {
     id: root
 
-    // The block is five hours; two-minute resolution is plenty.
+    // Two-minute resolution is plenty for account quota changes.
     readonly property int pollInterval: 120000
 
     property int watchers: 0
@@ -34,61 +31,41 @@ Singleton {
     // `available` is true, so nothing would subscribe otherwise.
     Component.onCompleted: root.refresh()
 
-    property real blockStart: 0
-    property real blockEnd: 0
-    property int blockTokens: 0
-    property int blockMessages: 0
-    property int weekTokens: 0
-    property int weekMessages: 0
-    property int peakBlockTokens: 0
-    property int peakWeekTokens: 0
+    property string plan: ""
+    property real primaryUsedPercent: 0
+    property bool secondaryAvailable: false
+    property real secondaryUsedPercent: 0
+    property real primaryResetAt: 0
+    property real secondaryResetAt: 0
+    property int primaryWindowDurationMins: 0
+    property int secondaryWindowDurationMins: 0
 
-    // "resets in 3 h 53 min"
-    readonly property string resetsIn: {
-        if (!root.available)
-            return ""
-        const minutes = Math.ceil(root.remaining / 60000)
+    function windowLabel(minutes: int): string {
         if (minutes <= 0)
-            return "resets now"
-        const hours = Math.floor(minutes / 60)
-        return hours > 0
-            ? `resets in ${hours} h ${minutes % 60} min`
-            : `resets in ${minutes} min`
+            return ""
+        if (minutes % (7 * 24 * 60) === 0)
+            return `${minutes / (7 * 24 * 60)}w`
+        if (minutes % (24 * 60) === 0)
+            return `${minutes / (24 * 60)}d`
+        if (minutes % 60 === 0)
+            return `${minutes / 60}h`
+        return `${minutes}m`
     }
 
-    // Wall clock, so the countdown advances between polls.
-    readonly property SystemClock clock: SystemClock {
-        precision: SystemClock.Minutes
-        enabled: root.watchers > 0
+    readonly property string primaryWindowLabel: root.windowLabel(root.primaryWindowDurationMins)
+    readonly property string secondaryWindowLabel: root.windowLabel(root.secondaryWindowDurationMins)
+
+    function resetNote(timestamp: real, windowAvailable: bool): string {
+        if (!root.available || !windowAvailable || timestamp <= 0)
+            return ""
+        return `resets ${new Date(timestamp * 1000).toLocaleString()}`
     }
 
-    readonly property real remaining: {
-        if (!root.available)
-            return 0
-        return Math.max(0, root.blockEnd * 1000 - root.clock.date.getTime())
-    }
-
-    readonly property real elapsed: {
-        const span = root.blockEnd - root.blockStart
-        if (span <= 0)
-            return 0
-        return Math.max(0, Math.min(1, 1 - root.remaining / (span * 1000)))
-    }
-
-    readonly property real gauge: root.elapsed
-
-    // 1.2k, 34k, 8.7M.
-    function compact(tokens: int): string {
-        if (tokens >= 1000000)
-            return `${(tokens / 1000000).toFixed(1)}M`
-        if (tokens >= 1000)
-            return `${Math.round(tokens / 1000)}k`
-        return `${tokens}`
-    }
-
-    function messages(count: int): string {
-        return `${root.compact(count)} message${count === 1 ? "" : "s"}`
-    }
+    readonly property string primaryResetNote: root.resetNote(root.primaryResetAt, true)
+    readonly property string secondaryResetNote: root.resetNote(root.secondaryResetAt, root.secondaryAvailable)
+    readonly property real gauge: root.available
+        ? Math.max(0, Math.min(1, root.primaryUsedPercent / 100))
+        : 0
 
     function subscribe(): void {
         root.watchers += 1
@@ -126,14 +103,14 @@ Singleton {
                     return
                 }
                 root.available = true
-                root.blockStart = report.blockStart
-                root.blockEnd = report.blockEnd
-                root.blockTokens = report.blockTokens
-                root.blockMessages = report.blockMessages
-                root.weekTokens = report.weekTokens
-                root.weekMessages = report.weekMessages
-                root.peakBlockTokens = report.peakBlockTokens
-                root.peakWeekTokens = report.peakWeekTokens
+                root.plan = report.plan || ""
+                root.primaryUsedPercent = report.primaryUsedPercent || 0
+                root.secondaryAvailable = report.secondaryAvailable === true
+                root.secondaryUsedPercent = report.secondaryUsedPercent || 0
+                root.primaryResetAt = report.primaryResetAt || 0
+                root.secondaryResetAt = report.secondaryResetAt || 0
+                root.primaryWindowDurationMins = report.primaryWindowDurationMins || 0
+                root.secondaryWindowDurationMins = report.secondaryWindowDurationMins || 0
             }
         }
     }

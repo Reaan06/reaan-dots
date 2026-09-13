@@ -39,6 +39,7 @@ Singleton {
         { id: "media",         name: "Media",         bar: true,  width: 380, height: 150 },
         { id: "timer",         name: "Timer",         bar: true,  width: 348, height: 116 },
         { id: "claude",        name: "Claude",        bar: true,  width: 356, height: 150 },
+        { id: "chatgpt",       name: "ChatGPT",       bar: true,  width: 356, height: 184 },
         { id: "battery",       name: "Battery",       bar: true,  width: 320, height: 132 },
         { id: "volume",        name: "Volume",        bar: true,  width: 340, height: 116 },
         { id: "brightness",    name: "Brightness",    bar: true,  width: 340, height: 100 },
@@ -169,6 +170,8 @@ Singleton {
             if (ClaudeService.measured)
                 return `${Math.round(ClaudeService.sessionFraction * 100)}%`
             return ClaudeService.blockTokens > 0 ? ClaudeService.compact(ClaudeService.blockTokens) : "0%"
+        case "chatgpt":
+            return AuthService.chatgptAuthenticated ? "Ready" : "Login"
         case "stats":
             return `${StatsService.cpu.toFixed(0)}%`
         case "pet":
@@ -227,6 +230,8 @@ Singleton {
             return TimerService.running ? TimerService.tint : Theme.text
         case "claude":
             return ClaudeService.measured ? ClaudeService.tint : Theme.indicator
+        case "chatgpt":
+            return Theme.indicator
         }
         return Theme.text
     }
@@ -354,6 +359,8 @@ Singleton {
             // Reading this constructs the lazy singleton, which runs its
             // first query; it turns true a moment later.
             return ClaudeService.available
+        case "chatgpt":
+            return true
         case "battery":
             return BatteryService.available
         case "volume":

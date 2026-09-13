@@ -3,6 +3,7 @@
 
 import json
 import os
+import subprocess
 from pathlib import Path
 
 
@@ -27,20 +28,18 @@ def claude_authenticated(home):
 
 
 def codex_authenticated(home):
-    codex_home = Path(os.environ.get("CODEX_HOME") or home / ".codex")
-    auth = load_json(codex_home / "auth.json")
-    if not auth:
+    del home
+    try:
+        result = subprocess.run(
+            ["codex", "login", "status"],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=5,
+        )
+    except (OSError, subprocess.TimeoutExpired):
         return False
-    # Codex's documented API-key field is `openai_api_key`; keep the legacy
-    # spellings too so older auth files remain detectable without exposing it.
-    if any(non_empty(auth.get(key)) for key in
-           ("openai_api_key", "api_key", "apiKey", "OPENAI_API_KEY")):
-        return True
-    tokens = auth.get("tokens")
-    return isinstance(tokens, dict) and any(
-        non_empty(tokens.get(key))
-        for key in ("access_token", "refresh_token", "id_token")
-    )
+    return result.returncode == 0
 
 
 def status():
