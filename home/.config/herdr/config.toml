@@ -1,0 +1,34 @@
+onboarding = false
+
+# Herdr configuration managed by reaan-dots.
+
+[theme]
+# Use a built-in dark theme with neutral foregrounds.
+name = "one-dark"
+
+[theme.custom]
+panel_bg = "#06080f"
+accent = "#6FA0AF"
+green = "#B7CC85"
+blue = "#6FA0AF"
+red = "#CB7C94"
+yellow = "#DEBA87"
+
+[ui]
+accent = "#6FA0AF"
+show_agent_labels_on_pane_borders = true
+
+[terminal]
+# Keep every new Herdr pane on Fish, regardless of its installation path.
+default_shell = "fish"
+
+[keys]
+# Match tmux/Zellij-style prefix muscle memory.
+prefix = "ctrl+a"
+
+# Move between agents in the sidebar.
+previous_agent = "prefix+alt+k"
+next_agent = "prefix+alt+j"
+
+# Jump straight to agent N (1..9) as listed in the sidebar.
+focus_agent = "prefix+ctrl+1..9"

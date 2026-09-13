@@ -41,8 +41,8 @@ usage() {
     cat <<'EOF'
 Usage: ./setup <command> [options]
 
-  install     everything, in order: packages, the user folders, oh-my-zsh,
-              home/ into $HOME, system/ into /, the Hyprland plugins
+  install     everything, in order: packages, the user folders, home/ into
+              $HOME, system/ into /, the Hyprland plugins
   update      git pull, then install again with the same options
   uninstall   remove every installed file that has not been edited since
 
@@ -389,26 +389,6 @@ folders() {
     fi
 }
 
-# Cloned rather than installed with oh-my-zsh's script, which replaces
-# ~/.zshrc with its own template.
-omz() {
-    section oh-my-zsh
-    local omz=$HOME/.oh-my-zsh
-    local plugins=$omz/custom/plugins
-    if [[ ! -d $omz ]]; then
-        act git clone -q --depth=1 https://github.com/ohmyzsh/ohmyzsh.git "$omz"
-        say 'cloned oh-my-zsh'
-    fi
-    local name
-    for name in zsh-autosuggestions zsh-syntax-highlighting; do
-        if [[ ! -d $plugins/$name ]]; then
-            act git clone -q --depth=1 "https://github.com/zsh-users/$name" "$plugins/$name"
-            say "cloned $name"
-        fi
-    done
-    say ok
-}
-
 # hyprpm builds against the running Hyprland and keeps the .so in root's
 # /var/cache: it needs the session up, a terminal and a password.
 plugin() {
@@ -434,7 +414,6 @@ verb_plugins() {
 verb_install() {
     if (( ! SKIP_PACKAGES )); then verb_packages; fi
     folders
-    omz
     verb_sync
     if (( ! SKIP_SYSTEM )); then verb_system; fi
     if (( ! SKIP_PLUGINS )); then verb_plugins; fi
@@ -581,11 +560,9 @@ verb_check() {
     "$luac" -p "${files[@]}"
     say 'syntax ok'
 
-    # zsh -n takes one script at a time: further arguments become its
-    # positional parameters rather than more files to parse.
-    section zsh
+    section fish
     local f
-    while IFS= read -r f; do zsh -n "$f"; done < <(find home -name '.zshrc' -o -name '*.zsh')
+    while IFS= read -r f; do fish -n "$f"; done < <(find home -type f -name '*.fish')
     say 'syntax ok'
 
     section bash
