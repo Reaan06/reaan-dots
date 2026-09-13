@@ -84,6 +84,16 @@ Item {
 
         Loader {
             anchors.centerIn: parent
+            active: !root.ring && root.moduleId === "chatgpt"
+            sourceComponent: ChatGPTMark {
+                width: root.size
+                height: root.size
+                color: root.tint
+            }
+        }
+
+        Loader {
+            anchors.centerIn: parent
             active: !root.ring && root.moduleId === "pet"
             sourceComponent: PetFace {
                 width: root.size + 2
@@ -96,7 +106,8 @@ Item {
             id: symbol
 
             anchors.centerIn: parent
-            visible: root.moduleId !== "claude" && root.moduleId !== "pet"
+            visible: root.moduleId !== "claude" && root.moduleId !== "chatgpt"
+                && root.moduleId !== "pet"
             text: ModuleService.glyphOf(root.moduleId)
             font.family: Theme.fontMono
             font.pixelSize: root.size

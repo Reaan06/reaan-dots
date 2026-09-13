@@ -30,6 +30,7 @@ Item {
         media: mediaModule,
         timer: timerModule,
         claude: claudeModule,
+        chatgpt: chatgptModule,
         battery: batteryModule,
         volume: volumeModule,
         brightness: brightnessModule,
@@ -62,6 +63,7 @@ Item {
     Component { id: mediaModule;   MediaModule { compact: root.compact } }
     Component { id: timerModule;   TimerModule { compact: root.compact } }
     Component { id: claudeModule;  ClaudeModule { compact: root.compact } }
+    Component { id: chatgptModule; ChatGPTModule { compact: root.compact } }
     Component { id: batteryModule; BatteryModule { compact: root.compact } }
     Component { id: volumeModule;     VolumeModule { compact: root.compact } }
     Component { id: brightnessModule; BrightnessModule { compact: root.compact } }

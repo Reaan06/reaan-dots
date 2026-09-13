@@ -5,9 +5,8 @@ import "../../theme"
 import "../../services"
 import "../../components"
 
-// ChatGPT / Codex usage · current session and week
-// When authenticated, shows token consumption from the local
-// Codex state database. When not, shows a login prompt.
+// ChatGPT / Codex account quota · current session and week
+// When authenticated, shows account rate limits from Codex app-server.
 Item {
     id: root
 
@@ -44,7 +43,7 @@ Item {
 
                 Behavior on fillColor { ColorAnimation { duration: Theme.durationMedium } }
 
-                CodexMark {
+                ChatGPTMark {
                     anchors.centerIn: parent
                     width: Math.round(Theme.capsuleHeight * 0.53)
                     height: Math.round(Theme.capsuleHeight * 0.53)
@@ -78,7 +77,7 @@ Item {
 
                     Behavior on fillColor { ColorAnimation { duration: Theme.durationMedium } }
 
-                    CodexMark {
+                    ChatGPTMark {
                         anchors.centerIn: parent
                         width: 24
                         height: 24
@@ -103,7 +102,9 @@ Item {
                         Layout.fillWidth: true
                         text: AuthService.chatgptAuthenticated
                             ? (CodexService.available
-                                ? `Session ${CodexService.resetsIn}`
+                                ? (CodexService.plan
+                                    ? `Codex ${CodexService.plan}`
+                                    : "Codex account quota")
                                 : "Codex account authenticated")
                             : "Codex account not authenticated"
                         font.family: Theme.fontFamily
@@ -113,38 +114,42 @@ Item {
                 }
             }
 
-            // Authenticated: show usage breakdown
-            Repeater {
-                model: AuthService.chatgptAuthenticated && CodexService.available ? [
-                    {
-                        label: "SESSION",
-                        tokens: CodexService.blockTokens,
-                        count: CodexService.blockMessages
-                    },
-                    {
-                        label: "WEEK",
-                        tokens: CodexService.weekTokens,
-                        count: CodexService.weekMessages
-                    }
-                ] : []
+             // Keep both windows visible; an omitted secondary window is not 0%.
+             RowLayout {
+                 Layout.alignment: Qt.AlignHCenter
+                 spacing: 12
 
-                ColumnLayout {
-                    required property var modelData
+                 QuotaRing {
+                     Layout.preferredWidth: 58
+                     Layout.preferredHeight: 58
+                     usedPercent: CodexService.primaryUsedPercent
+                     available: AuthService.chatgptAuthenticated && CodexService.available
+                     label: CodexService.primaryWindowLabel || "5h"
+                     trackColor: Theme.indicatorDim
+                     fillColor: Theme.indicator
+                 }
 
-                    Layout.fillWidth: true
-                    Layout.preferredWidth: 1
-                    spacing: 5
+                 QuotaRing {
+                     Layout.preferredWidth: 58
+                     Layout.preferredHeight: 58
+                     usedPercent: CodexService.secondaryUsedPercent
+                     available: AuthService.chatgptAuthenticated && CodexService.available
+                         && CodexService.secondaryAvailable
+                     label: CodexService.secondaryWindowLabel || "week"
+                     trackColor: Theme.indicatorDim
+                     fillColor: Theme.indicator
+                 }
+              }
 
-                    Figure {
-                        Layout.fillWidth: true
-                        label: column.modelData.label
-                        value: `${CodexService.compact(column.modelData.tokens)} tokens`
-                        note: CodexService.messages(column.modelData.count)
-                    }
-                }
-            }
+             PillButton {
+                 visible: AuthService.chatgptAuthenticated
+                 enabled: !AuthService.loggingOut
+                 text: "Log out of Codex"
+                 Layout.alignment: Qt.AlignRight
+                 onClicked: AuthService.logout("chatgpt")
+             }
 
-            // Not authenticated: show login prompt
+             // Only show the login prompt while the Codex account is unauthenticated.
             LoginPrompt {
                 visible: !AuthService.chatgptAuthenticated
                 service: "chatgpt"
