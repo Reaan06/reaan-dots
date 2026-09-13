@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/andreumassanet/impasto/actions/workflows/check.yml"><img src="https://github.com/andreumassanet/impasto/actions/workflows/check.yml/badge.svg" alt="check"></a>
+  <a href="https://github.com/Reaan06/reaan-dots/actions/workflows/check.yml"><img src="https://github.com/Reaan06/reaan-dots/actions/workflows/check.yml/badge.svg" alt="check"></a>
   <img src="https://img.shields.io/badge/Arch_Linux-1793d1?style=flat-square&logo=archlinux&logoColor=white" alt="Arch Linux">
   <img src="https://img.shields.io/badge/Hyprland-Lua_config-58e1ff?style=flat-square&logo=hyprland&logoColor=white" alt="Hyprland">
   <img src="https://img.shields.io/badge/Quickshell-0.3-000000?style=flat-square" alt="Quickshell">
@@ -158,9 +158,23 @@ Run it from a terminal inside the Hyprland session — the plugins are built
 against the compositor that is running:
 
 ```bash
-git clone https://github.com/andreumassanet/impasto.git ~/impasto
-cd ~/impasto
-./setup install
+curl -fsSL https://raw.githubusercontent.com/Reaan06/reaan-dots/main/install.sh | bash -s -- --skip-system --skip-plugins
+```
+
+The command clones Impasto into `~/reaan-dots` and runs `setup install`. Set
+`IMPASTO_DIR` to choose another destination. Forward any safe setup flags after
+`--`, such as `--skip-system` or `--skip-plugins`:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Reaan06/reaan-dots/main/install.sh | bash -s -- --skip-system
+```
+
+Alternatively, clone it yourself and run the installer from the checkout:
+
+```bash
+git clone https://github.com/Reaan06/reaan-dots.git ~/reaan-dots
+cd ~/reaan-dots
+./install.sh
 ```
 
 It installs the packages, oh-my-zsh, everything in `home/` into your home and

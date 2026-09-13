@@ -26,3 +26,7 @@ _mock*.qml
 *.gpg
 id_rsa
 id_ed25519
+
+# Local tooling metadata
+.atl/
+.codegraph/

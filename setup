@@ -4,7 +4,7 @@
 # │   S E T U P                                                              │
 # │   the installer · packages, the files, the system, the plugins           │
 # │                                                                          │
-# │   github.com/andreumassanet/impasto                                      │
+# │   github.com/Reaan06/reaan-dots                                          │
 # │                                                                          │
 # ╰──────────────────────────────────────────────────────────────────────────╯
 
@@ -162,7 +162,7 @@ keep_aside() {
 # directory link must go before anything is copied through it, or the copy
 # lands back in the repository.
 unstow() {
-    local rel=$1 prefix= part
+    local rel=$1 prefix='' part
     local -a parts
     IFS=/ read -ra parts <<< "$rel"
     for part in "${parts[@]}"; do
@@ -182,7 +182,7 @@ unstow() {
 # Whether a path is under a link `unstow` removed (or would have, in a dry
 # run).
 gone() {
-    local prefix= part
+    local prefix='' part
     local -a parts
     IFS=/ read -ra parts <<< "$1"
     for part in "${parts[@]}"; do
@@ -293,7 +293,8 @@ seed() {
 verb_sync() {
     section home
     SUDO=
-    deploy home "$HOME" "$STATE/home.manifest" '~/'
+    local shown=$'~/'
+    deploy home "$HOME" "$STATE/home.manifest" "$shown"
     seed
 }
 
@@ -306,7 +307,8 @@ verb_watch() {
     while inotifywait -qq -r -e close_write,create,delete,move \
         --exclude '/(\.git|__pycache__)/|\.impasto-new$|\.sw[po]$|~$' "$REPO/home"; do
         LOOKED=() GONE=()
-        deploy home "$HOME" "$STATE/home.manifest" '~/'
+        local shown=$'~/'
+        deploy home "$HOME" "$STATE/home.manifest" "$shown"
     done
 }
 
@@ -436,7 +438,7 @@ verb_install() {
     verb_sync
     if (( ! SKIP_SYSTEM )); then verb_system; fi
     if (( ! SKIP_PLUGINS )); then verb_plugins; fi
-    section done
+    section 'done'
     say 'log out and in again, or reload what is running: hyprctl reload'
 }
 
@@ -472,7 +474,8 @@ remove_tree() {
 
 verb_uninstall() {
     SUDO=
-    remove_tree home "$HOME" "$STATE/home.manifest" '~/'
+    local shown=$'~/'
+    remove_tree home "$HOME" "$STATE/home.manifest" "$shown"
     SUDO=sudo
     if [[ -w ${ROOT:-/} ]]; then SUDO=; fi
     remove_tree system "$ROOT" "$STATE/system.manifest" '/'
@@ -587,6 +590,7 @@ verb_check() {
 
     section bash
     bash -n setup
+    bash -n install.sh
     say 'syntax ok'
 
     # Plain JSON only (the one .jsonc file is fastfetch's). A typo in the
