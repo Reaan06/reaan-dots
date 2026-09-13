@@ -31,6 +31,7 @@ Singleton {
 
     property int watchers: 0
     property bool available: false
+    readonly property bool authenticated: AuthService.claudeAuthenticated
 
     // Query once on construction: the bar only builds the module once
     // `available` is true, so nothing would subscribe otherwise.

@@ -30,6 +30,8 @@ singleton CavaService        1.0 services/CavaService.qml
 singleton CompositorService  1.0 services/CompositorService.qml
 singleton BluetoothService   1.0 services/BluetoothService.qml
 singleton ClaudeService      1.0 services/ClaudeService.qml
+singleton CodexService       1.0 services/CodexService.qml
+singleton AuthService        1.0 services/AuthService.qml
 singleton UpdatesService     1.0 services/UpdatesService.qml
 singleton PetService         1.0 services/PetService.qml
 singleton ModuleService      1.0 services/ModuleService.qml
@@ -65,6 +67,9 @@ Sparkline        1.0 components/Sparkline.qml
 Spectrum         1.0 components/Spectrum.qml
 NotchFillet      1.0 components/NotchFillet.qml
 ClaudeMark       1.0 components/ClaudeMark.qml
+ChatGPTMark      1.0 components/ChatGPTMark.qml
+CodexMark        1.0 components/CodexMark.qml
+LoginPrompt      1.0 components/LoginPrompt.qml
 PaletteBoard     1.0 components/PaletteBoard.qml
 PetFace          1.0 components/PetFace.qml
 PetFamily        1.0 components/PetFamily.qml
@@ -121,6 +126,7 @@ ClockModule      1.0 bar/modules/ClockModule.qml
 MediaModule      1.0 bar/modules/MediaModule.qml
 TimerModule      1.0 bar/modules/TimerModule.qml
 ClaudeModule     1.0 bar/modules/ClaudeModule.qml
+ChatGPTModule    1.0 bar/modules/ChatGPTModule.qml
 BatteryModule    1.0 bar/modules/BatteryModule.qml
 VolumeModule     1.0 bar/modules/VolumeModule.qml
 BrightnessModule 1.0 bar/modules/BrightnessModule.qml
