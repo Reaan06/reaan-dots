@@ -21,6 +21,8 @@ import "./widgets"
 PanelWindow {
     id: root
 
+    readonly property ScreenMetrics metrics: ScreenMetrics { screen: root.screen }
+
     anchors {
         top: true
         left: true
@@ -28,7 +30,7 @@ PanelWindow {
     }
 
     // Tall enough for the capsules and their shadow; nothing opens below.
-    implicitHeight: root.collapsedHeight + Theme.shadowBarRange
+    implicitHeight: root.collapsedHeight + root.metrics.px(Theme.shadowBarRange)
 
     readonly property int collapsedHeight: Theme.barBand
 
@@ -49,6 +51,8 @@ PanelWindow {
     BarZone {
         entries: SettingsService.barItems("left")
         origin: "elsewhere"
+        monitorName: root.screen?.name ?? ""
+        metrics: root.metrics
         x: root.edgeMargin
         y: Theme.barTopMargin
     }
@@ -58,6 +62,8 @@ PanelWindow {
 
         entries: SettingsService.barItems("right")
         origin: "elsewhere"
+        monitorName: root.screen?.name ?? ""
+        metrics: root.metrics
         x: root.width - root.edgeMargin - right.width
         y: Theme.barTopMargin
     }

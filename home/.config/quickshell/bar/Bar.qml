@@ -36,6 +36,7 @@ PanelWindow {
     id: root
 
     readonly property alias island: island
+    readonly property ScreenMetrics metrics: ScreenMetrics { screen: root.screen }
 
     // Distance from the screen edge to the ends. Matches the compositor's
     // outer gap so the bar lines up with tiled windows.
@@ -56,7 +57,7 @@ PanelWindow {
     // between them; otherwise the sides move aside and it gets the whole bar.
     readonly property int panelRoom: root.spread
         ? root.width - 2 * (root.edgeMargin
-            + Math.max(leftZone.width, rightZone.width) + Theme.capsuleSpacing)
+            + Math.max(leftZone.width, rightZone.width) + root.metrics.px(Theme.capsuleSpacing))
         : root.width - 2 * root.edgeMargin
 
     // Computed rather than read from `island.x`, which comes from an anchor
@@ -71,11 +72,12 @@ PanelWindow {
     // into it and the sides are clipped by its closing ends.
 
     // Inset of each side from the band's edge, clear of the curve.
-    readonly property int hostedInset: 12
+    readonly property int hostedInset: root.metrics.px(12)
 
     // The same at both ends, so the clock stays centred on the screen.
     readonly property real hostedSlot: root.unified
-        ? root.hostedInset + Math.max(leftZone.width, rightZone.width) + Theme.capsuleSpacing * 2
+        ? root.hostedInset + Math.max(leftZone.width, rightZone.width)
+            + root.metrics.px(Theme.capsuleSpacing) * 2
         : 0
 
     // The island's width inside the band, animated on the island's clock so
@@ -305,10 +307,10 @@ PanelWindow {
             layer.effect: MultiEffect {
                 blurEnabled: true
                 blur: 1
-                blurMax: Theme.shadowBarRange - Theme.shadowBarSpread
+                blurMax: root.metrics.px(Theme.shadowBarRange - Theme.shadowBarSpread)
             }
 
-            readonly property int spread: Theme.shadowBarSpread
+            readonly property int spread: root.metrics.px(Theme.shadowBarSpread)
 
             Rectangle {
                 x: band.x - caster.spread
@@ -393,6 +395,7 @@ PanelWindow {
 
         hosted: root.unified
         roomForPanel: root.panelRoom
+        monitorName: root.screen?.name ?? ""
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: root.islandTopMargin
@@ -484,9 +487,11 @@ PanelWindow {
 
             entries: SettingsService.barItems("left")
             chromeless: root.unified
+            monitorName: root.screen?.name ?? ""
+            metrics: root.metrics
             x: (root.unified ? root.bodyX + root.hostedInset
                 : root.spread ? root.edgeMargin
-                : root.islandLeft - Theme.capsuleSpacing - leftZone.width) - sides.x
+                : root.islandLeft - root.metrics.px(Theme.capsuleSpacing) - leftZone.width) - sides.x
             y: root.laneY
             opacity: root.sidesAway ? 0 : 1
             visible: opacity > 0
@@ -504,9 +509,11 @@ PanelWindow {
 
             entries: SettingsService.barItems("right")
             chromeless: root.unified
+            monitorName: root.screen?.name ?? ""
+            metrics: root.metrics
             x: (root.unified ? root.bodyX + root.bodyWidth - root.hostedInset - rightZone.width
                 : root.spread ? root.width - root.edgeMargin - rightZone.width
-                : root.islandRight + Theme.capsuleSpacing) - sides.x
+                : root.islandRight + root.metrics.px(Theme.capsuleSpacing)) - sides.x
             y: root.laneY
             opacity: root.sidesAway ? 0 : 1
             visible: opacity > 0

@@ -24,6 +24,8 @@ Rectangle {
     // passed up.
     signal settingsRequested()
 
+    property string monitorName: ""
+
     readonly property alias state: islandState
     readonly property bool expanded: islandState.expanded
 
@@ -537,7 +539,10 @@ Rectangle {
 
     Component {
         id: overviewPanel
-        OverviewPanel { onClosed: root.close() }
+        OverviewPanel {
+            monitorName: root.monitorName
+            onClosed: root.close()
+        }
     }
 
     Component {
