@@ -54,10 +54,12 @@ Implement one coherent responsive-layout work unit at the responsive bar/island 
 - Task document created before source changes.
 - Engram mirror: initial document saved and read back as observation `#4841`.
 - Implementation: `Bar.qml` passes the existing metrics and usable panel room into `DynamicIsland`; `DynamicIsland.qml` owns scaled panel contracts, viewport bounds, and baseline-content fitting; `ModuleService.qml` scales catalogue/open sizes and corrects Timer, ChatGPT, and Brightness content budgets.
-- Verification: `./setup check` passed; `qmllint -v -I home/.config/quickshell` passed for the three changed QML source files; `shellcheck setup install.sh` is available but reports existing `SC2015` at `setup:515`.
+- Previous native reliability review: approved the candidate with one informational, non-blocking warning. It reported that `panelContent` applied a non-unit scale without an explicit top-left transform origin, which could shift content relative to `panelViewport` and leave gaps or overflow.
+- Follow-up fix: `panelContent` now uses the existing QML convention `transformOrigin: Item.TopLeft`, keeping scaled content anchored to the top-left of `panelViewport`. No other geometry or redesign changes were made.
+- Follow-up verification: `./setup check` passed; `shellcheck setup install.sh` completed with the existing unchanged informational `SC2015` at `setup:515`; `qmllint -v -I home/.config/quickshell home/.config/quickshell/bar/Bar.qml home/.config/quickshell/bar/widgets/DynamicIsland.qml home/.config/quickshell/services/ModuleService.qml` passed (`qmllint 1.0`); `git diff HEAD --check` passed.
 - Runtime GUI validation: not run; no display/harness was available for a safe repository-only verification.
-- Commit identity: the final inspected work-unit commit is reported with its exact short ID at delivery; its subject is `fix(quickshell): scale panels across monitor sizes`.
-- Rollback boundary: the responsive-layout files and this task document only; revert the work-unit commit without touching `home/.config/herdr/config.toml`.
+- Commit identity: the follow-up commit subject is `fix(quickshell): anchor scaled panel content`; its exact short ID is recorded at delivery.
+- Rollback boundary: revert only the follow-up commit to remove the top-left transform-origin fix and its task-document evidence, without touching `home/.config/herdr/config.toml` or the prior responsive-sizing commit.
 
 ## Next step
 

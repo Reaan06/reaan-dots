@@ -463,6 +463,7 @@ Rectangle {
                 width: Math.max(1, panelViewport.width / root.screenScale)
                 height: Math.max(1, panelViewport.height / root.screenScale)
                 scale: root.screenScale
+                transformOrigin: Item.TopLeft
 
                 Loader {
                     id: panelLoader
