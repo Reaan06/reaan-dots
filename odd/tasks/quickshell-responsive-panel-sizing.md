@@ -33,6 +33,18 @@ Implement one coherent responsive-layout work unit at the responsive bar/island 
 
 Revalidate persisted desktop-widget positions against the current board before rendering and whenever screen or board geometry changes. Repair collisions deterministically while preserving valid positions and ordering where possible, and clip each widget's own face content to its card boundary.
 
+### QSRP-003 — Normalize ChatGPT quota-ring sizing
+
+Make the ChatGPT/Codex consumption rings use one responsive sizing contract across the island detail and desktop faces. Preserve equal circular geometry, keep the usage percentage represented by the sweep rather than the diameter, and size the rings from the available face/panel space instead of unrelated hard-coded values.
+
+#### QSRP-003 acceptance criteria
+
+- [x] The ChatGPT detail, square desktop face, and wide desktop face derive ring size from a shared `QuotaRing` contract.
+- [x] Both quota rings remain equal-sized circles within each surface and never stretch or clip their labels.
+- [x] Usage remains proportional to the arc sweep; ring diameter does not encode usage.
+- [x] `./setup check`, `qmllint` for every changed QML file, and `git diff --check` pass.
+- [ ] The intended source and task-document files are committed in one Conventional Commit; `home/.config/herdr/config.toml` remains untouched.
+
 #### QSRP-002 scope
 
 - `DesktopService` load/resize geometry validation and deterministic nearest-cell collision reflow.
@@ -84,7 +96,7 @@ Revalidate persisted desktop-widget positions against the current board before r
 
 #### QSRP-002 next step
 
-Complete the focused follow-up checks and commit. Runtime GUI layout validation can be performed later in an authorized display session; visual success is not claimed here.
+Complete QSRP-003's responsive quota-ring sizing checks and commit. Runtime GUI layout validation can be performed later in an authorized display session; visual success is not claimed here.
 
 ## Acceptance criteria
 
@@ -119,6 +131,15 @@ Complete the focused follow-up checks and commit. Runtime GUI layout validation 
 - Commit identity: the follow-up commit subject is `fix(quickshell): anchor scaled panel content`; its exact short ID is recorded at delivery.
 - Rollback boundary: revert only the follow-up commit to remove the top-left transform-origin fix and its task-document evidence, without touching `home/.config/herdr/config.toml` or the prior responsive-sizing commit.
 
+## QSRP-003 progress / evidence
+
+- Task authorized after diagnosis that ChatGPT quota rings used unrelated hard-coded dimensions (`58px` in the island detail, `48px` in the square face, and a separate `70px` cap in the wide face), while `QuotaRing` had no shared size contract.
+- Implementation: `QuotaRing.qml` now exposes `availableSize`, `preferredSize`, `minimumSize`, `maximumSize`, and a clamped `resolvedSize` contract. The ChatGPT detail uses the available quota-row width with a 58px maximum; the square and wide faces use the smaller of their per-ring width budget and face-body height, with equal square dimensions for both rings. All quota progress remains `usedPercent / 100` inside `QuotaRing`.
+- Verification: `./setup check` passed; `qmllint -v -I home/.config/quickshell` passed for `components/QuotaRing.qml`, `bar/modules/ChatGPTModule.qml`, `desktop/faces/Squares.qml`, and `desktop/faces/Wides.qml` (`qmllint 1.0`); `git diff --check` passed.
+- Runtime GUI validation: not run; no authorized display/harness was available, so no visual success is claimed.
+- Commit status: not committed per orchestration instruction. `home/.config/herdr/config.toml` remains a pre-existing unstaged modification and was not edited.
+- Rollback boundary: revert the QSRP-003 changes in the four QML files and this evidence block; this leaves the prior responsive panel and desktop-widget work intact.
+
 ## Next step
 
-No further repository step remains; runtime GUI validation can be performed later in an authorized display session.
+Implement QSRP-003, run the focused checks, synchronize the live configuration, and confirm the visual result on the real display when available.

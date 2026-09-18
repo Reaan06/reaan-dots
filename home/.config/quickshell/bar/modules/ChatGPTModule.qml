@@ -127,19 +127,25 @@ Item {
             }
 
              // Keep both windows visible; an omitted secondary window is not 0%.
-             RowLayout {
-                 Layout.alignment: Qt.AlignHCenter
-                 spacing: 12
+              RowLayout {
+                  id: quotaWindows
+                  Layout.alignment: Qt.AlignHCenter
+                  Layout.fillWidth: true
+                  spacing: 12
 
-                  ColumnLayout {
-                      Layout.preferredWidth: 82
-                      spacing: 4
+                   ColumnLayout {
+                       Layout.fillWidth: true
+                       spacing: 4
 
-                      QuotaRing {
-                          Layout.alignment: Qt.AlignHCenter
-                          Layout.preferredWidth: 58
-                          Layout.preferredHeight: 58
-                          usedPercent: CodexService.primaryUsedPercent
+                       QuotaRing {
+                           id: primaryQuota
+                           Layout.alignment: Qt.AlignHCenter
+                           Layout.preferredWidth: resolvedSize
+                           Layout.preferredHeight: resolvedSize
+                           availableSize: (quotaWindows.width - quotaWindows.spacing) / 2
+                           preferredSize: 58
+                           maximumSize: 58
+                           usedPercent: CodexService.primaryUsedPercent
                           available: AuthService.chatgptAuthenticated && CodexService.available
                           label: CodexService.primaryWindowLabel || "5h"
                           trackColor: Theme.indicatorDim
@@ -157,14 +163,17 @@ Item {
                       }
                   }
 
-                  ColumnLayout {
-                      Layout.preferredWidth: 82
-                      spacing: 4
+                   ColumnLayout {
+                       Layout.fillWidth: true
+                       spacing: 4
 
-                      QuotaRing {
-                          Layout.alignment: Qt.AlignHCenter
-                          Layout.preferredWidth: 58
-                          Layout.preferredHeight: 58
+                       QuotaRing {
+                           Layout.alignment: Qt.AlignHCenter
+                           Layout.preferredWidth: resolvedSize
+                           Layout.preferredHeight: resolvedSize
+                           availableSize: (quotaWindows.width - quotaWindows.spacing) / 2
+                           preferredSize: 58
+                           maximumSize: 58
                           usedPercent: CodexService.secondaryUsedPercent
                           available: AuthService.chatgptAuthenticated && CodexService.available
                               && CodexService.secondaryAvailable

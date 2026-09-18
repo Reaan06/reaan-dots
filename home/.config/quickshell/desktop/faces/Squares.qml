@@ -292,14 +292,17 @@ Item {
                  color: root.ink.text
              }
 
-             body: Row {
-                 anchors.centerIn: parent
-                 spacing: 8
+              body: Row {
+                  anchors.fill: parent
+                  spacing: 8
 
-                 QuotaRing {
-                     width: 48
-                     height: 48
-                     usedPercent: CodexService.primaryUsedPercent
+                  QuotaRing {
+                      width: resolvedSize
+                      height: resolvedSize
+                      anchors.verticalCenter: parent.verticalCenter
+                      availableSize: Math.min((parent.width - parent.spacing) / 2,
+                                              parent.height)
+                      usedPercent: CodexService.primaryUsedPercent
                      available: AuthService.chatgptAuthenticated && CodexService.available
                      label: CodexService.primaryWindowLabel || "5h"
                      trackColor: root.ink.dim
@@ -308,9 +311,12 @@ Item {
                      labelColor: root.ink.muted
                  }
 
-                 QuotaRing {
-                     width: 48
-                     height: 48
+                  QuotaRing {
+                      width: resolvedSize
+                      height: resolvedSize
+                      anchors.verticalCenter: parent.verticalCenter
+                      availableSize: Math.min((parent.width - parent.spacing) / 2,
+                                              parent.height)
                      usedPercent: CodexService.secondaryUsedPercent
                      available: AuthService.chatgptAuthenticated && CodexService.available
                          && CodexService.secondaryAvailable
