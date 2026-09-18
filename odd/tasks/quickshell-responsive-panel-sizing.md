@@ -55,7 +55,7 @@ Revalidate persisted desktop-widget positions against the current board before r
 - [x] Each widget clips only its own face content to its card boundary.
 - [x] `./setup check`, `qmllint` for every changed QML file, `git diff --check`, and available `shellcheck setup install.sh` pass or have exact bounded results recorded.
 - [x] No visual success is claimed without a real display; no deterministic repository-only geometry harness exists for this QML singleton, so runtime limitation is explicit.
-- [ ] Intended source and task-document files are committed in one Conventional Commit; `home/.config/herdr/config.toml` is not staged.
+- [x] Intended source and task-document files are committed in one Conventional Commit; `home/.config/herdr/config.toml` is not staged.
 
 #### QSRP-002 applicable checks
 
@@ -74,11 +74,12 @@ Revalidate persisted desktop-widget positions against the current board before r
 - Implementation: `DesktopService.qml` now scales the desktop cell/gutter contract from board width (unchanged at the 1920px baseline), reflows persisted squares in stable order on load, settings refresh, and board geometry changes, and uses nearest-cell distance with deterministic row/column tie-breaking. Valid non-overlapping positions are retained; only invalid or colliding rows are repaired. `Widget.qml` adds a card-sized content boundary while leaving edit affordances outside it; `Face.qml` and `WidgetFace.qml` also clip their face content.
 - Verification: `./setup check` passed; `qmllint -I home/.config/quickshell` passed for `services/DesktopService.qml`, `desktop/Widget.qml`, `desktop/Face.qml`, and `desktop/faces/WidgetFace.qml`; `git diff --check` passed; `shellcheck setup install.sh` completed with only the known existing informational `SC2015` at `setup:515`.
 - Deterministic repository-only geometry exercise: not available; `qmltestrunner` exists but the repository has no QML test fixture and the singleton depends on the live shell/settings graph. GUI/runtime layout validation: not run; no authorized display/harness was available, so no visual success is claimed.
-- Exact commit identity, rollback boundary, and final next step will be recorded after the single work-unit commit.
+- Commit identity: `e5031fb` (`fix(quickshell): reflow desktop widgets on resize`). Only the five intended QSRP-002 files were staged; `home/.config/herdr/config.toml` remained unstaged and untouched.
+- Rollback boundary: revert `e5031fb` to remove only the desktop grid reflow, proportional grid scaling, face-content clipping, and QSRP-002 task evidence; this leaves the prior DynamicIsland commits (`228c27f`, `7007511`, `0fb27a1`) and the herdr configuration modification intact.
 
 #### QSRP-002 next step
 
-Commit only the intended desktop-layout source and task-document files in one Conventional Commit, then record the exact commit and rollback boundary.
+No repository step remains. Runtime GUI layout validation can be performed later in an authorized display session; visual success is not claimed here.
 
 ## Acceptance criteria
 
