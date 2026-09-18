@@ -305,7 +305,9 @@ Singleton {
 
     // The catalogue size, except network and Bluetooth, which open the
     // control centre's lists, and an empty notification list, which is short.
-    function openSize(id: string, factor: real = 1): var {
+    function openSize(id, factor) {
+        if (factor === undefined)
+            factor = 1
         if (id === "network" || id === "bluetooth")
             return { width: Math.round(420 * factor), height: Math.round(500 * factor) }
         const item = root.entry(id)
