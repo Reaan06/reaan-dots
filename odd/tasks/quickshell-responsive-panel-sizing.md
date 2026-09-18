@@ -43,7 +43,7 @@ Make the ChatGPT/Codex consumption rings use one responsive sizing contract acro
 - [x] Both quota rings remain equal-sized circles within each surface and never stretch or clip their labels.
 - [x] Usage remains proportional to the arc sweep; ring diameter does not encode usage.
 - [x] `./setup check`, `qmllint` for every changed QML file, and `git diff --check` pass.
-- [ ] The intended source and task-document files are committed in one Conventional Commit; `home/.config/herdr/config.toml` remains untouched.
+- [x] The intended source and task-document files are committed in one Conventional Commit; `home/.config/herdr/config.toml` remains untouched.
 
 #### QSRP-002 scope
 
@@ -137,9 +137,9 @@ Complete QSRP-003's responsive quota-ring sizing checks and commit. Runtime GUI 
 - Implementation: `QuotaRing.qml` now exposes `availableSize`, `preferredSize`, `minimumSize`, `maximumSize`, and a clamped `resolvedSize` contract. The ChatGPT detail uses the available quota-row width with a 58px maximum; the square and wide faces use the smaller of their per-ring width budget and face-body height, with equal square dimensions for both rings. All quota progress remains `usedPercent / 100` inside `QuotaRing`.
 - Verification: `./setup check` passed; `qmllint -v -I home/.config/quickshell` passed for `components/QuotaRing.qml`, `bar/modules/ChatGPTModule.qml`, `desktop/faces/Squares.qml`, and `desktop/faces/Wides.qml` (`qmllint 1.0`); `git diff --check` passed.
 - Runtime GUI validation: not run; no authorized display/harness was available, so no visual success is claimed.
-- Commit status: not committed per orchestration instruction. `home/.config/herdr/config.toml` remains a pre-existing unstaged modification and was not edited.
+- Commit identity: `7dffae4` (`fix(quickshell): scale ChatGPT quota rings`). Only the four QSRP-003 QML files and this task document were staged; `home/.config/herdr/config.toml` remains a pre-existing unstaged modification and was not edited.
 - Rollback boundary: revert the QSRP-003 changes in the four QML files and this evidence block; this leaves the prior responsive panel and desktop-widget work intact.
 
 ## Next step
 
-Implement QSRP-003, run the focused checks, synchronize the live configuration, and confirm the visual result on the real display when available.
+Synchronize the committed QSRP-003 files and confirm the visual result on the real display when available.
