@@ -20,6 +20,10 @@ import "../../services"
 Item {
     id: root
 
+    // Child marks, body content, and custom extras belong to the card, even
+    // when a service value or animation briefly exceeds its allotted bounds.
+    clip: true
+
     // The module's name in the corner, so widgets identify themselves without a
     // hover.
     property string label: ""

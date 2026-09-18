@@ -129,42 +129,50 @@ Item {
         border.width: 1.5
     }
 
-    // Disabled while arranging so dragging does not press buttons. `enabled`
-    // rather than an overlay item, which would take the drag as well.
-    Face {
-        anchors.fill: parent
-        moduleId: root.moduleId
-        family: root.family
-        theme: DesktopService.themeOf(root.row)
-        ink: root.ink
-        row: root.row
-        enabled: !root.editing
-    }
+    // The face and its content controls share a boundary. The edit affordances
+    // below intentionally remain outside it so their negative margins work.
+    Item {
+        id: faceContent
 
-    MouseArea {
         anchors.fill: parent
-        visible: !root.editing && root.moduleId === "chatgpt"
-                && !AuthService.chatgptAuthenticated
-        enabled: visible
-        z: 2
-        hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
-        onClicked: AuthService.login("chatgpt")
-    }
+        clip: true
 
-    // Tasks are useful on the desktop at a glance, but their board lives in
-    // the island. Keep that action visible on every task face instead of
-    // requiring the user to open another module first.
-    PillButton {
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.rightMargin: 10
-        anchors.bottomMargin: 10
-        visible: !root.editing && root.moduleId === "tasks"
-        text: "Open"
-        icon: "󰄲"
-        implicitHeight: 26
-        onClicked: ModuleService.requestPanel("board")
+        // Disabled while arranging so dragging does not press buttons.
+        Face {
+            anchors.fill: parent
+            moduleId: root.moduleId
+            family: root.family
+            theme: DesktopService.themeOf(root.row)
+            ink: root.ink
+            row: root.row
+            enabled: !root.editing
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            visible: !root.editing && root.moduleId === "chatgpt"
+                    && !AuthService.chatgptAuthenticated
+            enabled: visible
+            z: 2
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: AuthService.login("chatgpt")
+        }
+
+        // Tasks are useful on the desktop at a glance, but their board lives in
+        // the island. Keep that action visible on every task face instead of
+        // requiring the user to open another module first.
+        PillButton {
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.rightMargin: 10
+            anchors.bottomMargin: 10
+            visible: !root.editing && root.moduleId === "tasks"
+            text: "Open"
+            icon: "󰄲"
+            implicitHeight: 26
+            onClicked: ModuleService.requestPanel("board")
+        }
     }
 
     // Without a capsule the contents get a drop shadow to stay readable on the

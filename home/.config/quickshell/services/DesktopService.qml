@@ -57,8 +57,8 @@ Singleton {
     function sizeFor(familyId: string): var {
         const shape = root.family(familyId)
         return {
-            width: shape.cols * Theme.desktopCell + (shape.cols - 1) * Theme.desktopGutter,
-            height: shape.rows * Theme.desktopCell + (shape.rows - 1) * Theme.desktopGutter
+            width: shape.cols * root.gridCell + (shape.cols - 1) * root.gridGutter,
+            height: shape.rows * root.gridCell + (shape.rows - 1) * root.gridGutter
         }
     }
 
@@ -175,9 +175,18 @@ Singleton {
     property real boardWidth: 0
     property real boardHeight: 0
 
+    // Keep the 1920px-wide layout unchanged, while making the same cell
+    // contract usable on narrower boards. The lower bound leaves enough room
+    // for the largest family without making small-monitor text microscopic.
+    readonly property real gridScale: root.boardWidth > 0
+        ? Math.max(0.7, Math.min(1, root.boardWidth / 1920)) : 1
+    readonly property real gridCell: Theme.desktopCell * root.gridScale
+    readonly property real gridGutter: Theme.desktopGutter * root.gridScale
+    readonly property real gridStride: root.gridCell + root.gridGutter
+
     function fits(length: real): int {
         return Math.max(1, Math.floor(
-            (length - Theme.desktopGutter) / Theme.desktopStride))
+            (length - root.gridGutter) / root.gridStride))
     }
 
     readonly property int columns: root.boardWidth > 0 ? root.fits(root.boardWidth) : 8
@@ -186,13 +195,16 @@ Singleton {
     // Cell origin. The board has a gutter at its edge too, matching the gap
     // between widgets.
     function offsetOf(cell: int): real {
-        return Theme.desktopGutter + cell * Theme.desktopStride
+        return root.gridGutter + cell * root.gridStride
     }
 
     // Nearest cell to a position (rounded, not floored).
     function cellOf(position: real): int {
-        return Math.round((position - Theme.desktopGutter) / Theme.desktopStride)
+        return Math.round((position - root.gridGutter) / root.gridStride)
     }
+
+    onBoardWidthChanged: root.reflow()
+    onBoardHeightChanged: root.reflow()
 
     // ── ROWS ────────────────────────────────────────────────────────────────
     //
@@ -247,6 +259,7 @@ Singleton {
             if (saver.running)
                 return
             root.widgets = root.normalise(SettingsService.desktopWidgets)
+            root.reflow()
         }
     }
 
@@ -272,7 +285,10 @@ Singleton {
 
     onShownChanged: root.syncKeys()
     onShownDecksChanged: root.syncKeys()
-    Component.onCompleted: root.syncKeys()
+    Component.onCompleted: {
+        root.syncKeys()
+        root.reflow()
+    }
 
     function syncKeys(): void {
         const next = root.shown.map(widget => widget.key)
@@ -328,6 +344,74 @@ Singleton {
     }
 
     // ── COLLISIONS ──────────────────────────────────────────────────────────
+
+    function overlapsPlaced(col: int, row: int, familyId: string, placed: var): bool {
+        const shape = root.family(familyId)
+        for (const other of placed) {
+            const theirs = root.family(other.family)
+            if (col < other.col + theirs.cols && other.col < col + shape.cols
+                    && row < other.row + theirs.rows && other.row < row + shape.rows)
+                return true
+        }
+        return false
+    }
+
+    function nearestAvailable(col: int, row: int, familyId: string, placed: var): var {
+        const wantedCol = Math.max(0, Math.min(root.columns - 1, col))
+        const wantedRow = Math.max(0, Math.min(root.rows - 1, row))
+        let best = null
+        let bestDistance = Infinity
+        for (let r = 0; r < root.rows; r++) {
+            for (let c = 0; c < root.columns; c++) {
+                if (!root.onBoard(c, r, familyId)
+                        || root.overlapsPlaced(c, r, familyId, placed))
+                    continue
+                const distance = (c - wantedCol) * (c - wantedCol)
+                    + (r - wantedRow) * (r - wantedRow)
+                if (distance < bestDistance) {
+                    bestDistance = distance
+                    best = { col: c, row: r }
+                }
+            }
+        }
+        return best
+    }
+
+    // Reflow in persisted order. A valid, unoccupied position is kept exactly;
+    // only invalid or colliding rows take the nearest free fit. The resulting
+    // order and tie-break (top-to-bottom, left-to-right) are deterministic.
+    property bool reflowing: false
+
+    function reflow(): void {
+        if (root.reflowing || root.boardWidth <= 0 || root.boardHeight <= 0)
+            return
+        root.reflowing = true
+        const placed = []
+        let changed = false
+        const next = root.widgets.map(widget => {
+            if (root.isDeck(widget))
+                return widget
+            const familyId = root.familyOf(widget)
+            const wantedCol = typeof widget.col === "number" ? Math.floor(widget.col) : 0
+            const wantedRow = typeof widget.row === "number" ? Math.floor(widget.row) : 0
+            const spot = root.onBoard(wantedCol, wantedRow, familyId)
+                    && !root.overlapsPlaced(wantedCol, wantedRow, familyId, placed)
+                ? { col: wantedCol, row: wantedRow }
+                : root.nearestAvailable(wantedCol, wantedRow, familyId, placed)
+            if (!spot)
+                return widget
+            placed.push({ col: spot.col, row: spot.row, family: familyId })
+            if (spot.col !== wantedCol || spot.row !== wantedRow
+                    || typeof widget.col !== "number" || typeof widget.row !== "number") {
+                changed = true
+                return Object.assign({}, widget, { col: spot.col, row: spot.row })
+            }
+            return widget
+        })
+        root.reflowing = false
+        if (changed)
+            root.write(next)
+    }
 
     function overlaps(col: int, row: int, familyId: string, exceptKey: string): bool {
         const shape = root.family(familyId)
