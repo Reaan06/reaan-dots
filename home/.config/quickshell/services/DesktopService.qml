@@ -236,9 +236,19 @@ Singleton {
                 row.style = "bare"
             delete row.bare
             delete row.ink
+            if (!(typeof row.edge === "string" && row.edge !== "")) {
+                row.col = root.integerCell(row.col)
+                row.row = root.integerCell(row.row)
+            }
             rows.push(row)
         }
         return rows
+    }
+
+    // Persisted coordinates must be usable cells, not transient geometry.
+    function integerCell(value: var): int {
+        return typeof value === "number" && Number.isFinite(value)
+            ? Math.floor(value) : 0
     }
 
     property var widgets: root.normalise(SettingsService.desktopWidgets)
@@ -268,9 +278,11 @@ Singleton {
         onTriggered: SettingsService.set("desktopWidgets", root.widgets)
     }
 
-    // Every widget is always drawn; one with no data shows an empty state
-    // ("Nothing playing") instead of disappearing.
-    readonly property var shown: root.squares
+    // A square with no fit is hidden until the board can accommodate it. This
+    // keeps overflow from leaving a visible card on top of another card.
+    property var overflowKeys: []
+    readonly property var shown: root.squares.filter(widget =>
+        root.overflowKeys.indexOf(widget.key) < 0)
 
     // Non-empty decks, or all of them while arranging.
     readonly property var shownDecks: root.editing
@@ -387,19 +399,22 @@ Singleton {
             return
         root.reflowing = true
         const placed = []
+        const overflow = []
         let changed = false
         const next = root.widgets.map(widget => {
             if (root.isDeck(widget))
                 return widget
             const familyId = root.familyOf(widget)
-            const wantedCol = typeof widget.col === "number" ? Math.floor(widget.col) : 0
-            const wantedRow = typeof widget.row === "number" ? Math.floor(widget.row) : 0
+            const wantedCol = root.integerCell(widget.col)
+            const wantedRow = root.integerCell(widget.row)
             const spot = root.onBoard(wantedCol, wantedRow, familyId)
                     && !root.overlapsPlaced(wantedCol, wantedRow, familyId, placed)
                 ? { col: wantedCol, row: wantedRow }
                 : root.nearestAvailable(wantedCol, wantedRow, familyId, placed)
-            if (!spot)
+            if (!spot) {
+                overflow.push(widget.key)
                 return widget
+            }
             placed.push({ col: spot.col, row: spot.row, family: familyId })
             if (spot.col !== wantedCol || spot.row !== wantedRow
                     || typeof widget.col !== "number" || typeof widget.row !== "number") {
@@ -408,6 +423,7 @@ Singleton {
             }
             return widget
         })
+        root.overflowKeys = overflow
         root.reflowing = false
         if (changed)
             root.write(next)

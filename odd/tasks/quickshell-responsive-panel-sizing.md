@@ -76,10 +76,15 @@ Revalidate persisted desktop-widget positions against the current board before r
 - Deterministic repository-only geometry exercise: not available; `qmltestrunner` exists but the repository has no QML test fixture and the singleton depends on the live shell/settings graph. GUI/runtime layout validation: not run; no authorized display/harness was available, so no visual success is claimed.
 - Commit identity: `e5031fb` (`fix(quickshell): reflow desktop widgets on resize`). Only the five intended QSRP-002 files were staged; `home/.config/herdr/config.toml` remained unstaged and untouched.
 - Rollback boundary: revert `e5031fb` to remove only the desktop grid reflow, proportional grid scaling, face-content clipping, and QSRP-002 task evidence; this leaves the prior DynamicIsland commits (`228c27f`, `7007511`, `0fb27a1`) and the herdr configuration modification intact.
+- Native reliability review follow-up: deterministic warnings found that an overflow result from `nearestAvailable()` was not included in `placed`, allowing later widgets to overlap it, and that temporary flooring accepted fractional or `NaN` coordinates without persisting finite integer cells.
+- Follow-up implementation: sanitize square coordinates to finite integer cells before reflow validation, and track no-fit squares in the existing `shown` model so an overflow widget cannot remain visible at an overlapping position; valid placement order and nearest-cell repair remain unchanged.
+- Follow-up verification: `./setup check` passed; `qmllint -v -I home/.config/quickshell home/.config/quickshell/services/DesktopService.qml` passed (`qmllint 1.0`); `git diff --check` passed; `shellcheck setup install.sh` completed with only the existing informational `SC2015` at `setup:515`; deterministic repository-only QML reflow exercise is unavailable because no fixture exists for this singleton, while the unrelated Python integration suite passed (`5` tests).
+- Commit identity: the focused follow-up was committed with subject `fix(quickshell): harden desktop widget reflow`; the final exact ID is reported at delivery.
+- Rollback boundary: revert the focused follow-up commit to remove only coordinate sanitization, overflow hiding, and its QSRP-002 evidence, while preserving the prior QSRP-002 reflow/clipping commit and the untouched herdr modification.
 
 #### QSRP-002 next step
 
-No repository step remains. Runtime GUI layout validation can be performed later in an authorized display session; visual success is not claimed here.
+Complete the focused follow-up checks and commit. Runtime GUI layout validation can be performed later in an authorized display session; visual success is not claimed here.
 
 ## Acceptance criteria
 
