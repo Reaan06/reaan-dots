@@ -59,6 +59,8 @@ PanelWindow {
         ? root.width - 2 * (root.edgeMargin
             + Math.max(leftZone.width, rightZone.width) + root.metrics.px(Theme.capsuleSpacing))
         : root.width - 2 * root.edgeMargin
+    readonly property int panelRoomHeight: Math.max(1,
+        root.height - root.islandTopMargin - root.metrics.px(Theme.barTopMargin))
 
     // Computed rather than read from `island.x`, which comes from an anchor
     // resolved during layout and would lag a frame behind the width.
@@ -84,8 +86,8 @@ PanelWindow {
     // the band widens with it. An OSD is wider than the clock and pushes the
     // sides out rather than overlapping them.
     property real restWidth: island.state.layer === island.state.layerOsd
-        ? Math.max(ModuleService.restWidth, island.size.width)
-        : ModuleService.restWidth
+        ? Math.max(island.size.width, root.metrics.px(Theme.capsuleHeight))
+        : island.size.width
 
     Behavior on restWidth {
         NumberAnimation { duration: Theme.durationMorph; easing.type: Theme.easing }
@@ -395,6 +397,8 @@ PanelWindow {
 
         hosted: root.unified
         roomForPanel: root.panelRoom
+        roomForPanelHeight: root.panelRoomHeight
+        metrics: root.metrics
         monitorName: root.screen?.name ?? ""
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top

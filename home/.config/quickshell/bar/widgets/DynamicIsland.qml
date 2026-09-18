@@ -25,6 +25,7 @@ Rectangle {
     signal settingsRequested()
 
     property string monitorName: ""
+    required property ScreenMetrics metrics
 
     readonly property alias state: islandState
     readonly property bool expanded: islandState.expanded
@@ -62,6 +63,17 @@ Rectangle {
     // Width left between the bar's ends (`Bar.panelRoom`). Unconstrained by
     // default, so an island without a bar gets the size it asks for.
     property int roomForPanel: 100000
+    property int roomForPanelHeight: 100000
+
+    readonly property real screenScale: root.metrics.factor
+
+    function scaled(value: real): int {
+        return root.metrics.px(value)
+    }
+
+    function scaledSize(value: var): var {
+        return { width: root.scaled(value.width), height: root.scaled(value.height) }
+    }
 
     readonly property int overviewRows: Math.ceil(SettingsService.workspaceMax / 5)
 
@@ -70,55 +82,69 @@ Rectangle {
     // Declared rather than measured: the island has to reach its final shape
     // before the panel inside it is loaded.
     readonly property var panelSizes: ({
-        controls:   { width: ControlsService.panelWidth, height: ControlsService.panelHeight },
+        controls:   root.scaledSize({ width: ControlsService.panelWidth,
+                                     height: ControlsService.panelHeight }),
         appearance: root.appearanceSize,
         palette:    root.appearanceSize,
-        stats:      { width: 940,  height: 614 },
+        stats:      root.scaledSize({ width: 940,  height: 614 }),
         // Depends on the results when `launcherFits` is on.
-        launcher:   { width: LauncherService.panelWidth,
-                      height: LauncherService.panelHeight },
-        wifi:       { width: 420,  height: 500 },
-        bluetooth:  { width: 420,  height: 500 },
-        session:    { width: 720,  height: 180 },
+        launcher:   root.scaledSize({ width: LauncherService.panelWidth,
+                                      height: LauncherService.panelHeight }),
+        wifi:       root.scaledSize({ width: 420,  height: 500 }),
+        bluetooth:  root.scaledSize({ width: 420,  height: 500 }),
+        session:    root.scaledSize({ width: 720,  height: 180 }),
         // A row per creature, plus one for the next egg.
-        pet:        { width: 560,  height: 205 + 62 * PetService.family.length },
+        pet:        root.scaledSize({ width: 560,
+                                      height: 205 + 62 * PetService.family.length }),
         // The shelf of cards, or the game being played at its own size.
         games:      GamesService.playing !== ""
-            ? GamesService.panelSize(GamesService.playing)
-            : { width: GamesService.shelfWidth, height: GamesService.shelfHeight },
+            ? root.scaledSize(GamesService.panelSize(GamesService.playing))
+            : root.scaledSize({ width: GamesService.shelfWidth,
+                                height: GamesService.shelfHeight }),
         // Declared by their services, which the panels read back for layout.
-        notes:      { width: NotesService.panelWidth, height: NotesService.panelHeight },
-        board:      { width: TasksService.panelWidth, height: TasksService.panelHeight },
+        notes:      root.scaledSize({ width: NotesService.panelWidth,
+                                     height: NotesService.panelHeight }),
+        board:      root.scaledSize({ width: TasksService.panelWidth,
+                                     height: TasksService.panelHeight }),
         // The key sheet's columns come from the compositor's bind list.
-        keys:       { width: ShortcutService.sheetWidth, height: ShortcutService.sheetHeight },
-        packages:   { width: PackagesService.panelWidth, height: PackagesService.panelHeight },
+        keys:       root.scaledSize({ width: ShortcutService.sheetWidth,
+                                     height: ShortcutService.sheetHeight }),
+        packages:   root.scaledSize({ width: PackagesService.panelWidth,
+                                      height: PackagesService.panelHeight }),
         module:     root.moduleSize,
-        overview:   { width: 1560, height: 72 + root.overviewRows * 190 }
+        overview:   root.scaledSize({ width: 1560,
+                                      height: 72 + root.overviewRows * 190 })
     })
 
     // One panel under two names (its two strips), so switching between them
     // slides instead of rebuilding. Fits five strip tiles and the large one.
-    readonly property var appearanceSize: ({ width: 940, height: 196 })
+    readonly property var appearanceSize: root.scaledSize({ width: 940, height: 196 })
 
     // A module's detail, sized from the catalogue.
-    readonly property var moduleSize: ModuleService.openSize(ModuleService.openId)
+    readonly property var moduleSize:
+        ModuleService.openSize(ModuleService.openId, root.screenScale)
 
     readonly property var panelSize:
         root.panelSizes[islandState.openPanel] ?? root.panelSizes.controls
 
     // Only the overview is ever wide enough to hit the limit.
-    readonly property int panelWidth: Math.min(root.panelSize.width, root.roomForPanel)
-    readonly property int panelHeight: root.panelSize.height
+    readonly property int panelWidth: Math.max(1,
+        Math.min(root.panelSize.width, root.roomForPanel))
+    readonly property int panelHeight: Math.max(1,
+        Math.min(root.panelSize.height, root.roomForPanelHeight))
 
     // One entry per layer: the capsule's size and the padding inside it.
     readonly property var layerSizes: ({
-        modules:      { width: ModuleService.restWidth, height: Theme.capsuleHeight, padding: 0 },
-        summary:      { width: ModuleService.summaryWidth,
-                        height: ModuleService.summaryHeight,
+        modules:      { width: root.scaled(ModuleService.restWidth),
+                        height: root.scaled(Theme.capsuleHeight), padding: 0 },
+        summary:      { width: root.scaled(ModuleService.summaryWidth),
+                        height: root.scaled(ModuleService.summaryHeight),
                         padding: 0 },
-        osd:          { width: 260, height: Theme.capsuleHeight, padding: 10 },
-        notification: { width: 430, height: 68,                  padding: 13 },
-        panel:        { width: root.panelWidth, height: root.panelHeight, padding: Theme.panelPadding }
+        osd:          { width: root.scaled(260), height: root.scaled(Theme.capsuleHeight),
+                       padding: root.scaled(10) },
+        notification: { width: root.scaled(430), height: root.scaled(68),
+                        padding: root.scaled(13) },
+        panel:        { width: root.panelWidth, height: root.panelHeight, padding: root.panelPad }
     })
 
     readonly property var size: root.layerSizes[islandState.layer] ?? root.layerSizes.modules
@@ -419,21 +445,38 @@ Rectangle {
 
         Keys.onEscapePressed: root.close()
 
-        Loader {
-            id: panelLoader
+        Item {
+            id: panelViewport
 
             anchors.fill: parent
             anchors.topMargin: root.panelPad + root.notchPad
             anchors.leftMargin: root.panelPad
             anchors.rightMargin: root.panelPad
             anchors.bottomMargin: root.panelPad
-            active: islandState.expanded
-            sourceComponent: root.panelComponents[islandState.openPanel] ?? controlsPanel
-            opacity: islandState.expanded ? 1 : 0
 
-            Behavior on opacity {
-                enabled: root.animated
-                NumberAnimation { duration: Theme.durationMedium; easing.type: Theme.easing }
+            // Resolve the content at baseline dimensions, then scale the whole
+            // panel together so typography, controls, padding and icons keep
+            // the same proportions as the geometry.
+            Item {
+                id: panelContent
+
+                width: Math.max(1, panelViewport.width / root.screenScale)
+                height: Math.max(1, panelViewport.height / root.screenScale)
+                scale: root.screenScale
+
+                Loader {
+                    id: panelLoader
+
+                    anchors.fill: parent
+                    active: islandState.expanded
+                    sourceComponent: root.panelComponents[islandState.openPanel] ?? controlsPanel
+                    opacity: islandState.expanded ? 1 : 0
+
+                    Behavior on opacity {
+                        enabled: root.animated
+                        NumberAnimation { duration: Theme.durationMedium; easing.type: Theme.easing }
+                    }
+                }
             }
         }
     }

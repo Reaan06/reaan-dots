@@ -37,12 +37,12 @@ Singleton {
     // desktop faces are listed per theme in `DesktopService.faces`.
     readonly property var catalogue: [
         { id: "media",         name: "Media",         bar: true,  width: 380, height: 150 },
-        { id: "timer",         name: "Timer",         bar: true,  width: 348, height: 116 },
+        { id: "timer",         name: "Timer",         bar: true,  width: 348, height: 180 },
         { id: "claude",        name: "Claude",        bar: true,  width: 356, height: 150 },
-        { id: "chatgpt",       name: "ChatGPT",       bar: true,  width: 356, height: 184 },
+        { id: "chatgpt",       name: "ChatGPT",       bar: true,  width: 356, height: 216 },
         { id: "battery",       name: "Battery",       bar: true,  width: 320, height: 132 },
         { id: "volume",        name: "Volume",        bar: true,  width: 340, height: 116 },
-        { id: "brightness",    name: "Brightness",    bar: true,  width: 340, height: 100 },
+        { id: "brightness",    name: "Brightness",    bar: true,  width: 340, height: 120 },
         { id: "network",       name: "Network",       bar: true,  width: 356, height: 132 },
         { id: "bluetooth",     name: "Bluetooth",     bar: true,  width: 356, height: 132 },
         { id: "notifications", name: "Notifications", bar: true,  desk: false, width: 380, height: 340 },
@@ -305,13 +305,13 @@ Singleton {
 
     // The catalogue size, except network and Bluetooth, which open the
     // control centre's lists, and an empty notification list, which is short.
-    function openSize(id: string): var {
+    function openSize(id: string, factor: real = 1): var {
         if (id === "network" || id === "bluetooth")
-            return { width: 420, height: 500 }
+            return { width: Math.round(420 * factor), height: Math.round(500 * factor) }
         const item = root.entry(id)
         if (id === "notifications" && NotificationService.history.length === 0)
-            return { width: item.width, height: 124 }
-        return { width: item.width, height: item.height }
+            return { width: Math.round(item.width * factor), height: Math.round(124 * factor) }
+        return { width: Math.round(item.width * factor), height: Math.round(item.height * factor) }
     }
 
     // A module that becomes unavailable closes its open detail.
