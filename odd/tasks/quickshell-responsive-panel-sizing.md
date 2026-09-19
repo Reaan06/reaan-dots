@@ -139,7 +139,8 @@ Complete QSRP-003's responsive quota-ring sizing checks and commit. Runtime GUI 
 - Runtime GUI validation: not run; no authorized display/harness was available, so no visual success is claimed.
 - Commit identity: `7dffae4` (`fix(quickshell): scale ChatGPT quota rings`). Only the four QSRP-003 QML files and this task document were staged; `home/.config/herdr/config.toml` remains a pre-existing unstaged modification and was not edited.
 - Rollback boundary: revert the QSRP-003 changes in the four QML files and this evidence block; this leaves the prior responsive panel and desktop-widget work intact.
+- Live sync: after the user explicitly authorized replacement, the protected live `~/.config/quickshell/bar/modules/ChatGPTModule.qml` was replaced by the repository version from `.new`; the previous live file was backed up under `~/.local/state/impasto/backups/`. Quickshell was restarted with one active instance remaining.
 
 ## Next step
 
-Synchronize the committed QSRP-003 files and confirm the visual result on the real display when available.
+Confirm the visual result on the real display when available.
