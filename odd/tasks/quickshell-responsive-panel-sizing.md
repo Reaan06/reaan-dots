@@ -46,7 +46,7 @@ Remove the small-face overflow caused by the shared ring minimum and center the 
 - [x] A ring never exceeds the available square-face body space, even below the preferred minimum.
 - [x] The two square-face rings remain equal-sized, centered, and do not overlap the reading or caption.
 - [x] `./setup check`, `qmllint` for every changed QML file, and `git diff --check` pass.
-- [ ] The intended source and task-document files are committed in one Conventional Commit; `home/.config/herdr/config.toml` remains untouched.
+- [x] The intended source and task-document files are committed in one Conventional Commit; `home/.config/herdr/config.toml` remains untouched.
 
 #### QSRP-003 acceptance criteria
 
@@ -157,9 +157,10 @@ Complete QSRP-003's responsive quota-ring sizing checks and commit. Runtime GUI 
 - Implementation: `QuotaRing.qml` now honors finite available sizes below its readable preferred minimum, including a zero-size budget, while retaining preferred-size fallback only when no budget is provided. The square ChatGPT face now centers an equal-ring inner row inside the `WidgetFace` body and derives one shared ring-size budget from that body, so the rings cannot reach the readings or caption.
 - Verification: `./setup check` passed; `qmllint -v -I home/.config/quickshell` passed for `components/QuotaRing.qml` and `desktop/faces/Squares.qml` (`qmllint 1.0`); `git diff --check` passed.
 - Runtime GUI validation: not run; no authorized display/harness was available, so no visual success is claimed.
-- Commit identity: pending orchestrator review and commit; `home/.config/herdr/config.toml` remains untouched, unstaged, and uncommitted.
+- Commit identity: `6d371a8` (`fix(quickshell): fit ChatGPT rings on small faces`). Only the QSRP-004 source files and task document were staged; `home/.config/herdr/config.toml` remains untouched, unstaged, and uncommitted.
 - Rollback boundary: revert the QSRP-004 changes in `components/QuotaRing.qml`, `desktop/faces/Squares.qml`, and this evidence block to restore the prior minimum-clamped ring behavior and square-face row layout.
+- Live sync: `./setup sync` updated the live `QuotaRing.qml` and `Squares.qml`; restarting through the existing supervisor left one active Quickshell instance in `qs list`.
 
 ## Next step
 
-Implement QSRP-004, synchronize the live files, and confirm the visual result on the real display when available.
+Confirm the visual result on the real display when available.
