@@ -37,6 +37,17 @@ Revalidate persisted desktop-widget positions against the current board before r
 
 Make the ChatGPT/Codex consumption rings use one responsive sizing contract across the island detail and desktop faces. Preserve equal circular geometry, keep the usage percentage represented by the sweep rather than the diameter, and size the rings from the available face/panel space instead of unrelated hard-coded values.
 
+### QSRP-004 — Fit ChatGPT rings in small square faces
+
+Remove the small-face overflow caused by the shared ring minimum and center the two ChatGPT quota rings inside the square face's actual body area, leaving the label, mark, reading, and caption readable.
+
+#### QSRP-004 acceptance criteria
+
+- [x] A ring never exceeds the available square-face body space, even below the preferred minimum.
+- [x] The two square-face rings remain equal-sized, centered, and do not overlap the reading or caption.
+- [x] `./setup check`, `qmllint` for every changed QML file, and `git diff --check` pass.
+- [ ] The intended source and task-document files are committed in one Conventional Commit; `home/.config/herdr/config.toml` remains untouched.
+
 #### QSRP-003 acceptance criteria
 
 - [x] The ChatGPT detail, square desktop face, and wide desktop face derive ring size from a shared `QuotaRing` contract.
@@ -141,6 +152,14 @@ Complete QSRP-003's responsive quota-ring sizing checks and commit. Runtime GUI 
 - Rollback boundary: revert the QSRP-003 changes in the four QML files and this evidence block; this leaves the prior responsive panel and desktop-widget work intact.
 - Live sync: after the user explicitly authorized replacement, the protected live `~/.config/quickshell/bar/modules/ChatGPTModule.qml` was replaced by the repository version from `.new`; the previous live file was backed up under `~/.local/state/impasto/backups/`. Quickshell was restarted with one active instance remaining.
 
+## QSRP-004 progress / evidence
+
+- Implementation: `QuotaRing.qml` now honors finite available sizes below its readable preferred minimum, including a zero-size budget, while retaining preferred-size fallback only when no budget is provided. The square ChatGPT face now centers an equal-ring inner row inside the `WidgetFace` body and derives one shared ring-size budget from that body, so the rings cannot reach the readings or caption.
+- Verification: `./setup check` passed; `qmllint -v -I home/.config/quickshell` passed for `components/QuotaRing.qml` and `desktop/faces/Squares.qml` (`qmllint 1.0`); `git diff --check` passed.
+- Runtime GUI validation: not run; no authorized display/harness was available, so no visual success is claimed.
+- Commit identity: pending orchestrator review and commit; `home/.config/herdr/config.toml` remains untouched, unstaged, and uncommitted.
+- Rollback boundary: revert the QSRP-004 changes in `components/QuotaRing.qml`, `desktop/faces/Squares.qml`, and this evidence block to restore the prior minimum-clamped ring behavior and square-face row layout.
+
 ## Next step
 
-Confirm the visual result on the real display when available.
+Implement QSRP-004, synchronize the live files, and confirm the visual result on the real display when available.

@@ -292,41 +292,53 @@ Item {
                  color: root.ink.text
              }
 
-              body: Row {
-                  anchors.fill: parent
-                  spacing: 8
+              body: Item {
+                  id: quotaBody
 
-                  QuotaRing {
-                      width: resolvedSize
-                      height: resolvedSize
-                      anchors.verticalCenter: parent.verticalCenter
-                      availableSize: Math.min((parent.width - parent.spacing) / 2,
-                                              parent.height)
-                      usedPercent: CodexService.primaryUsedPercent
-                     available: AuthService.chatgptAuthenticated && CodexService.available
-                     label: CodexService.primaryWindowLabel || "5h"
-                     trackColor: root.ink.dim
-                     fillColor: Theme.indicator
-                     textColor: root.ink.text
-                     labelColor: root.ink.muted
-                 }
+                  property real ringSpacing: 8
+                  readonly property real ringSizeBudget: Math.max(0,
+                      Math.min((width - ringSpacing) / 2, height))
 
-                  QuotaRing {
-                      width: resolvedSize
-                      height: resolvedSize
-                      anchors.verticalCenter: parent.verticalCenter
-                      availableSize: Math.min((parent.width - parent.spacing) / 2,
-                                              parent.height)
-                     usedPercent: CodexService.secondaryUsedPercent
-                     available: AuthService.chatgptAuthenticated && CodexService.available
-                         && CodexService.secondaryAvailable
-                     label: CodexService.secondaryWindowLabel || "week"
-                     trackColor: root.ink.dim
-                     fillColor: Theme.indicator
-                     textColor: root.ink.text
-                     labelColor: root.ink.muted
-                 }
-             }
+                  anchors.centerIn: parent
+                  width: Math.min(parent.width, parent.height * 2 + ringSpacing)
+                  height: parent.height
+
+                  Row {
+                      anchors.centerIn: parent
+                      spacing: quotaBody.ringSpacing
+
+                      QuotaRing {
+                          width: resolvedSize
+                          height: resolvedSize
+                          anchors.verticalCenter: parent.verticalCenter
+                          availableSize: quotaBody.ringSizeBudget
+                          usedPercent: CodexService.primaryUsedPercent
+                          available: AuthService.chatgptAuthenticated
+                              && CodexService.available
+                          label: CodexService.primaryWindowLabel || "5h"
+                          trackColor: root.ink.dim
+                          fillColor: Theme.indicator
+                          textColor: root.ink.text
+                          labelColor: root.ink.muted
+                      }
+
+                      QuotaRing {
+                          width: resolvedSize
+                          height: resolvedSize
+                          anchors.verticalCenter: parent.verticalCenter
+                          availableSize: quotaBody.ringSizeBudget
+                          usedPercent: CodexService.secondaryUsedPercent
+                          available: AuthService.chatgptAuthenticated
+                              && CodexService.available
+                              && CodexService.secondaryAvailable
+                          label: CodexService.secondaryWindowLabel || "week"
+                          trackColor: root.ink.dim
+                          fillColor: Theme.indicator
+                          textColor: root.ink.text
+                          labelColor: root.ink.muted
+                      }
+                  }
+              }
 
              MouseArea {
                 parent: chatgptFace
