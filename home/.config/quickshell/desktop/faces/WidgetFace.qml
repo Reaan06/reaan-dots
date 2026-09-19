@@ -46,6 +46,10 @@ Item {
     // height to spare.
     property int readingSize: Theme.fontSizeWidget
 
+    // The caption's size, overridable by faces whose secondary summary needs
+    // the same emphasis as the main reading.
+    property int noteSize: Theme.fontSizeSmall
+
     // The fraction of the width given to `extra`; 0 for a square. Declared
     // rather than derived from `extra`'s contents, because bindings do not
     // track list properties.
@@ -143,7 +147,7 @@ Item {
             text: root.note
             elide: Text.ElideRight
             font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontSizeSmall
+            font.pixelSize: root.noteSize
             color: root.ink.muted
         }
     }

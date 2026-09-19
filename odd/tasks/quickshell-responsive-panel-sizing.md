@@ -45,6 +45,17 @@ Remove the small-face overflow caused by the shared ring minimum and center the 
 
 Keep the percentage prominent inside each small quota ring and move the reset-window labels below the rings so the weekly consumption is readable instead of being squeezed into the ring.
 
+### QSRP-006 — Balance small-face quota summaries
+
+Give the primary five-hour and secondary weekly consumption summaries the same readable typography so the primary value does not dominate the secondary value below it.
+
+#### QSRP-006 acceptance criteria
+
+- [x] The five-hour and weekly summary strings use the same font size in the square ChatGPT face.
+- [x] Neither summary is rendered with the generic oversized desktop-widget reading size.
+- [x] `./setup check`, `qmllint` for every changed QML file, and `git diff --check` pass.
+- [x] The intended source and task-document files are committed in one Conventional Commit; `home/.config/herdr/config.toml` remains untouched.
+
 #### QSRP-005 acceptance criteria
 
 - [x] The square ChatGPT face shows both quota percentages clearly inside equal rings.
@@ -180,6 +191,14 @@ Complete QSRP-003's responsive quota-ring sizing checks and commit. Runtime GUI 
 - Commit identity: `d6fb1d7` (`fix(quickshell): clarify small-face quota windows`). Only `home/.config/quickshell/desktop/faces/Squares.qml` and this task document were staged; `home/.config/herdr/config.toml` remains untouched, unstaged, and uncommitted.
 - Live sync: `./setup sync` updated the live square ChatGPT face, and restarting through the existing supervisor left one active Quickshell instance in `qs list`.
 - Rollback boundary: revert the QSRP-005 changes in `home/.config/quickshell/desktop/faces/Squares.qml` and this evidence block to restore the prior in-ring window labels without changing the shared quota-ring contract.
+
+## QSRP-006 progress / evidence
+
+- Implementation: `WidgetFace.qml` now exposes `noteSize`, defaulting to `Theme.fontSizeSmall`, and uses it for the note text. The square ChatGPT face sets both `readingSize` and `noteSize` to `Theme.fontSizeRegular`, preserving the existing ring percentages and labels while removing the generic 30px desktop-widget reading size from both summaries.
+- Verification: `./setup check` passed (`python`, `lua`, `fish`, `bash`, `json`, and `toml` syntax checks); `qmllint -v -I home/.config/quickshell home/.config/quickshell/desktop/faces/WidgetFace.qml` passed (`qmllint 1.0`); `qmllint -v -I home/.config/quickshell home/.config/quickshell/desktop/faces/Squares.qml` passed (`qmllint 1.0`); `git diff --check` passed.
+- Runtime GUI validation: not run; no authorized display or harness was available, so no visual success is claimed.
+- Commit: included in the QSRP-006 Conventional Commit together with the two source files and this evidence block. `home/.config/herdr/config.toml` remains untouched and unstaged.
+- Rollback boundary: revert the QSRP-006 changes in `home/.config/quickshell/desktop/faces/WidgetFace.qml`, `home/.config/quickshell/desktop/faces/Squares.qml`, and this evidence block to restore the prior reading-size default and note typography.
 
 ## Next step
 

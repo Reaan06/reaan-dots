@@ -276,6 +276,8 @@ Item {
 
             ink: root.ink
             label: "ChatGPT"
+            readingSize: Theme.fontSizeRegular
+            noteSize: Theme.fontSizeRegular
             reading: !AuthService.chatgptAuthenticated ? "Not authenticated"
                 : CodexService.available ? `${CodexService.primaryWindowLabel} ${Math.round(CodexService.primaryUsedPercent)}%`
                 : "Authenticated"
