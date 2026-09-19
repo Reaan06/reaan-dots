@@ -41,6 +41,17 @@ Make the ChatGPT/Codex consumption rings use one responsive sizing contract acro
 
 Remove the small-face overflow caused by the shared ring minimum and center the two ChatGPT quota rings inside the square face's actual body area, leaving the label, mark, reading, and caption readable.
 
+### QSRP-005 — Improve small-face quota labels
+
+Keep the percentage prominent inside each small quota ring and move the reset-window labels below the rings so the weekly consumption is readable instead of being squeezed into the ring.
+
+#### QSRP-005 acceptance criteria
+
+- [x] The square ChatGPT face shows both quota percentages clearly inside equal rings.
+- [x] The `5h` and weekly window labels are readable below their respective rings without touching the reading or caption.
+- [x] `./setup check`, `qmllint` for every changed QML file, and `git diff --check` pass.
+- [ ] The intended source and task-document files are committed in one Conventional Commit; `home/.config/herdr/config.toml` remains untouched.
+
 #### QSRP-004 acceptance criteria
 
 - [x] A ring never exceeds the available square-face body space, even below the preferred minimum.
@@ -164,3 +175,11 @@ Complete QSRP-003's responsive quota-ring sizing checks and commit. Runtime GUI 
 ## Next step
 
 Confirm the visual result on the real display when available.
+
+## QSRP-005 progress / evidence
+
+- Implementation: The square ChatGPT face now uses a centered row of two equal columns. Each `QuotaRing` receives an empty label so its percentage remains the only text inside the ring; the primary (`primaryWindowLabel || "5h"`) and secondary (`secondaryWindowLabel || "week"`) labels render below their rings. Each column subtracts its label height and gap from the responsive ring-size budget, preserving the existing `WidgetFace` body constraint and shared `QuotaRing` contract.
+- Verification: `./setup check` passed (`python`, `lua`, `fish`, `bash`, `json`, and `toml` syntax checks); `qmllint -v -I home/.config/quickshell home/.config/quickshell/desktop/faces/Squares.qml` passed (`qmllint 1.0`); `git diff --check` passed.
+- Runtime GUI validation: not run; no authorized display/harness was available, so no visual success is claimed.
+- Commit identity: not applicable; the orchestrator will review and commit this uncommitted work unit.
+- Rollback boundary: revert the QSRP-005 changes in `desktop/faces/Squares.qml` and this evidence block to restore the prior in-ring window labels without changing the shared quota-ring contract.
