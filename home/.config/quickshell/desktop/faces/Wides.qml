@@ -308,15 +308,17 @@ Item {
             }
 
              extra: [
-                 Row {
-                     anchors.verticalCenter: parent.verticalCenter
-                     width: parent.width
-                     spacing: 10
+                  Row {
+                      anchors.fill: parent
+                      spacing: 10
 
-                     QuotaRing {
-                         width: Math.min(70, (parent.width - 10) / 2)
-                         height: width
-                         usedPercent: CodexService.primaryUsedPercent
+                      QuotaRing {
+                          width: resolvedSize
+                          height: resolvedSize
+                          anchors.verticalCenter: parent.verticalCenter
+                          availableSize: Math.min((parent.width - parent.spacing) / 2,
+                                                  parent.height)
+                          usedPercent: CodexService.primaryUsedPercent
                          available: AuthService.chatgptAuthenticated && CodexService.available
                          label: CodexService.primaryWindowLabel || "5h"
                          trackColor: root.ink.dim
@@ -325,9 +327,12 @@ Item {
                          labelColor: root.ink.muted
                      }
 
-                     QuotaRing {
-                         width: Math.min(70, (parent.width - 10) / 2)
-                         height: width
+                      QuotaRing {
+                          width: resolvedSize
+                          height: resolvedSize
+                          anchors.verticalCenter: parent.verticalCenter
+                          availableSize: Math.min((parent.width - parent.spacing) / 2,
+                                                  parent.height)
                          usedPercent: CodexService.secondaryUsedPercent
                          available: AuthService.chatgptAuthenticated && CodexService.available
                              && CodexService.secondaryAvailable

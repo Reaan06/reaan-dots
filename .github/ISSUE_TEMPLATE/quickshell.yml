@@ -1,0 +1,47 @@
+name: Quickshell bug
+description: Report a problem with the Quickshell desktop shell
+title: "[Quickshell]: "
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the visible problem and when it started.
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected behavior
+      description: What should the shell or widget have done instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: List the smallest sequence of steps that reproduces the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include the compositor, display setup, and relevant package versions.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste relevant Quickshell or compositor logs, removing secrets first.
+      render: shell
+    validations:
+      required: false
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Add screenshots, related changes, or other useful context.
+    validations:
+      required: false

@@ -137,9 +137,9 @@ bind(mainMod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true, descript
 -- · SUPER + [1-9,0] switches; adding SHIFT moves the window there
 for i = 1, 10 do
     local key = i % 10  -- 10 maps to the 0 key
-    bind(mainMod .. " + " .. key,         hl.dsp.focus({ workspace = i }),
+    bind(mainMod .. " + " .. key,         hl.dsp.focus({ workspace = "r~" .. i, on_current_monitor = true }),
          { description = "Workspaces · Go to workspace " .. i })
-    bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }),
+    bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = "r~" .. i }),
          { description = "Workspaces · Move the window to workspace " .. i })
 end
 

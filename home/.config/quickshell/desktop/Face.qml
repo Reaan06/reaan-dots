@@ -21,6 +21,11 @@ import "./faces/analogue"
 Item {
     id: root
 
+    // Every desktop face is content inside a card. Keep custom face families
+    // from painting outside that card; the widget's edit affordances remain
+    // outside this boundary in `Widget.qml`.
+    clip: true
+
     property string moduleId: ""
     property string family: "4x2"
     property string theme: DesktopService.themeOf(null)

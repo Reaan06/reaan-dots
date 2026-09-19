@@ -276,6 +276,8 @@ Item {
 
             ink: root.ink
             label: "ChatGPT"
+            readingSize: Theme.fontSizeRegular
+            noteSize: Theme.fontSizeRegular
             reading: !AuthService.chatgptAuthenticated ? "Not authenticated"
                 : CodexService.available ? `${CodexService.primaryWindowLabel} ${Math.round(CodexService.primaryUsedPercent)}%`
                 : "Authenticated"
@@ -292,35 +294,115 @@ Item {
                  color: root.ink.text
              }
 
-             body: Row {
-                 anchors.centerIn: parent
-                 spacing: 8
+              body: Item {
+                  id: quotaBody
 
-                 QuotaRing {
-                     width: 48
-                     height: 48
-                     usedPercent: CodexService.primaryUsedPercent
-                     available: AuthService.chatgptAuthenticated && CodexService.available
-                     label: CodexService.primaryWindowLabel || "5h"
-                     trackColor: root.ink.dim
-                     fillColor: Theme.indicator
-                     textColor: root.ink.text
-                     labelColor: root.ink.muted
-                 }
+                   property real ringSpacing: 8
 
-                 QuotaRing {
-                     width: 48
-                     height: 48
-                     usedPercent: CodexService.secondaryUsedPercent
-                     available: AuthService.chatgptAuthenticated && CodexService.available
-                         && CodexService.secondaryAvailable
-                     label: CodexService.secondaryWindowLabel || "week"
-                     trackColor: root.ink.dim
-                     fillColor: Theme.indicator
-                     textColor: root.ink.text
-                     labelColor: root.ink.muted
-                 }
-             }
+                   anchors.centerIn: parent
+                   width: Math.min(parent.width, parent.height * 2 + ringSpacing)
+                   height: parent.height
+
+                   Row {
+                       anchors.fill: parent
+                       spacing: quotaBody.ringSpacing
+
+                       Item {
+                           width: (parent.width - quotaBody.ringSpacing) / 2
+                           height: parent.height
+
+                           readonly property real labelGap: 3
+                           readonly property real ringSizeBudget: Math.max(0,
+                               Math.min(width, height - primaryWindowLabel.implicitHeight
+                                   - labelGap))
+
+                           Item {
+                               id: primaryRingArea
+                               anchors.top: parent.top
+                               anchors.left: parent.left
+                               anchors.right: parent.right
+                               height: parent.ringSizeBudget
+
+                               QuotaRing {
+                                   anchors.centerIn: parent
+                                   width: resolvedSize
+                                   height: resolvedSize
+                                   availableSize: parent.height
+                                   usedPercent: CodexService.primaryUsedPercent
+                                   available: AuthService.chatgptAuthenticated
+                                       && CodexService.available
+                                   label: ""
+                                   trackColor: root.ink.dim
+                                   fillColor: Theme.indicator
+                                   textColor: root.ink.text
+                                   labelColor: root.ink.muted
+                               }
+                           }
+
+                           Text {
+                               id: primaryWindowLabel
+                               anchors.top: primaryRingArea.bottom
+                               anchors.topMargin: parent.labelGap
+                               anchors.left: parent.left
+                               anchors.right: parent.right
+                               text: CodexService.primaryWindowLabel || "5h"
+                               horizontalAlignment: Text.AlignHCenter
+                               elide: Text.ElideRight
+                               font.family: Theme.fontFamily
+                               font.pixelSize: Theme.fontSizeSmall
+                               color: root.ink.muted
+                           }
+                       }
+
+                       Item {
+                           width: (parent.width - quotaBody.ringSpacing) / 2
+                           height: parent.height
+
+                           readonly property real labelGap: 3
+                           readonly property real ringSizeBudget: Math.max(0,
+                               Math.min(width, height - secondaryWindowLabel.implicitHeight
+                                   - labelGap))
+
+                           Item {
+                               id: secondaryRingArea
+                               anchors.top: parent.top
+                               anchors.left: parent.left
+                               anchors.right: parent.right
+                               height: parent.ringSizeBudget
+
+                               QuotaRing {
+                                   anchors.centerIn: parent
+                                   width: resolvedSize
+                                   height: resolvedSize
+                                   availableSize: parent.height
+                                   usedPercent: CodexService.secondaryUsedPercent
+                                   available: AuthService.chatgptAuthenticated
+                                       && CodexService.available
+                                       && CodexService.secondaryAvailable
+                                   label: ""
+                                   trackColor: root.ink.dim
+                                   fillColor: Theme.indicator
+                                   textColor: root.ink.text
+                                   labelColor: root.ink.muted
+                               }
+                           }
+
+                           Text {
+                               id: secondaryWindowLabel
+                               anchors.top: secondaryRingArea.bottom
+                               anchors.topMargin: parent.labelGap
+                               anchors.left: parent.left
+                               anchors.right: parent.right
+                               text: CodexService.secondaryWindowLabel || "week"
+                               horizontalAlignment: Text.AlignHCenter
+                               elide: Text.ElideRight
+                               font.family: Theme.fontFamily
+                               font.pixelSize: Theme.fontSizeSmall
+                               color: root.ink.muted
+                           }
+                       }
+                   }
+               }
 
              MouseArea {
                 parent: chatgptFace

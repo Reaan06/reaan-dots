@@ -85,7 +85,12 @@ terminal client; Herdr panes use Fish as their interactive shell.
 ./setup update       # git pull, then install again — the same flags
 ./setup uninstall    # remove everything setup installed that you have not edited since
 ./setup help         # every verb and flag
+./setup defaults     # opt in to unclaimed file defaults and dark GTK
+./setup vesktop      # opt in to enabling impasto.css in Vencord (close Vesktop first)
 ```
+
+`defaults` and `vesktop` are explicit integrations: normal install, update and
+palette changes do not alter application choices or Vencord settings.
 
 **Nothing is linked: `setup` copies**, and remembers what it wrote. A file of
 yours already in the way is moved to `~/.local/state/impasto/backups/` first; a

@@ -28,6 +28,7 @@ ColumnLayout {
     id: root
 
     signal closed()
+    property string monitorName: ""
 
     // Every workspace up to the maximum, not only those with a dot on the bar.
     readonly property int columns: Math.min(5, SettingsService.workspaceMax)
@@ -36,7 +37,16 @@ ColumnLayout {
 
     // The monitor the cells model. Positions are scaled from its real size
     // rather than an assumed aspect ratio.
-    readonly property var monitor: HyprlandService.monitors[0] ?? null
+    readonly property var monitor: {
+        if (root.monitorName !== "") {
+            const named = HyprlandService.monitors.find(
+                monitor => monitor.name === root.monitorName)
+            if (named)
+                return named
+        }
+        return HyprlandService.monitors[0] ?? null
+    }
+    readonly property string modeledMonitorName: root.monitor?.name ?? ""
     readonly property real screenWidth: root.monitor && root.monitor.width > 0
         ? root.monitor.width : 1920
     readonly property real screenHeight: root.monitor && root.monitor.height > 0
@@ -87,8 +97,20 @@ ColumnLayout {
     }
 
     function activate(): void {
-        HyprlandService.focus(root.selectedId)
+        HyprlandService.focusOnMonitor(root.modeledMonitorName, root.selectedId)
         root.closed()
+    }
+
+    property bool selectionInitialized: false
+
+    function initializeSelection(): void {
+        if (root.selectionInitialized || root.modeledMonitorName === "")
+            return
+        const activeSlot = HyprlandService.activeMonitorName === root.modeledMonitorName
+            ? HyprlandService.workspaceSlotForId(root.modeledMonitorName,
+                HyprlandService.activeId) : 0
+        root.selectedId = activeSlot > 0 ? activeSlot : 1
+        root.selectionInitialized = true
     }
 
     Keys.onLeftPressed: root.selectBy(-1)
@@ -106,9 +128,15 @@ ColumnLayout {
         HyprlandService.loadClients()
         HyprlandService.loadMonitors()
         void ToplevelManager.toplevels
-        root.selectedId = Math.min(Math.max(1, HyprlandService.activeId),
-                                   SettingsService.workspaceMax)
+        root.initializeSelection()
         root.forceActiveFocus()
+    }
+
+    Connections {
+        target: HyprlandService
+
+        function onMonitorsChanged(): void { root.initializeSelection() }
+        function onWorkspaceRowsChanged(): void { root.initializeSelection() }
     }
 
     // ── GRID ────────────────────────────────────────────────────────────────
@@ -172,10 +200,14 @@ ColumnLayout {
 
                     required property int index
 
-                    readonly property int workspaceId: cell.index + 1
-                    readonly property bool focused: HyprlandService.activeId === cell.workspaceId
-                    readonly property bool selected: root.selectedId === cell.workspaceId
-                    readonly property var windows: HyprlandService.clientsOn(cell.workspaceId)
+                    readonly property int localSlot: cell.index + 1
+                    readonly property int workspaceId: HyprlandService.workspaceIdForSlot(
+                        root.modeledMonitorName, cell.localSlot)
+                    readonly property bool focused: HyprlandService.isFocusedOnMonitor(
+                        root.modeledMonitorName, cell.localSlot)
+                    readonly property bool selected: root.selectedId === cell.localSlot
+                    readonly property var windows: cell.workspaceId > 0
+                        ? HyprlandService.clientsOn(cell.workspaceId) : []
                     readonly property bool empty: cell.windows.length === 0
 
                     // The topmost window at a point on the real screen
@@ -386,7 +418,7 @@ ColumnLayout {
                                             return
                                         }
                                         if (board.settled)
-                                            root.selectedId = cell.workspaceId
+                                            root.selectedId = cell.localSlot
                                     }
 
                                     onReleased: {
@@ -422,7 +454,7 @@ ColumnLayout {
                     // when a cell empties.
                     Text {
                         anchors.centerIn: parent
-                        text: cell.workspaceId
+                        text: cell.localSlot
                         font.family: Theme.fontFamily
                         font.pixelSize: Math.round(cell.height * 0.44)
                         font.weight: Font.DemiBold
@@ -459,10 +491,11 @@ ColumnLayout {
                         // whichever cell grew under a resting pointer.
                         onPositionChanged: {
                             if (board.settled)
-                                root.selectedId = cell.workspaceId
+                                root.selectedId = cell.localSlot
                         }
                         onClicked: {
-                            HyprlandService.focus(cell.workspaceId)
+                            HyprlandService.focusOnMonitor(root.modeledMonitorName,
+                                cell.localSlot)
                             root.closed()
                         }
                     }
@@ -491,7 +524,8 @@ ColumnLayout {
                             // Another workspace: just move it. Tiling decides
                             // the position; a floating window keeps its own.
                             if (client.workspace.id !== cell.workspaceId) {
-                                HyprlandService.moveClient(client.address, cell.workspaceId)
+                                HyprlandService.moveClientOnMonitor(client.address,
+                                    root.modeledMonitorName, cell.localSlot)
                                 dropped.accept()
                                 return
                             }

@@ -51,10 +51,12 @@ Usage: ./setup <command> [options]
   system      copy system/ into / (asks for a password)
   plugins     build and enable the two Hyprland plugins with hyprpm
 
+  defaults    set unclaimed file defaults and request dark GTK with impasto icons
   cursors     fetch the vector cursor and build it in the chosen colour
   spotify     re-apply the palette to Spotify (needs spicetify)
   vscodium    install the editor's extensions and merge its settings
   thunar      apply the file manager's settings and right-click menu
+  vesktop     enable the palette's theme in Vencord (with Vesktop closed)
 
   check       the syntax checks CI runs
   help        this
@@ -465,6 +467,59 @@ verb_uninstall() {
 
 # ── EXTRAS ──────────────────────────────────────────────────────────────────
 
+# Explicit opt-in only: leave every type with an existing user choice alone.
+DEFAULT_APPS=(
+    'imv.desktop image/jpeg image/png image/gif image/webp image/svg+xml'
+    'nvim.desktop text/plain application/json'
+    'thunar.desktop inode/directory'
+    'zen.desktop text/html application/pdf x-scheme-handler/http x-scheme-handler/https'
+)
+
+chosen() {
+    local list=${XDG_CONFIG_HOME:-$HOME/.config}/mimeapps.list
+    [[ -f $list ]] || return 1
+    awk -v key="$1=" '/^\[/ { section = ($0 == "[Default Applications]") }
+        section && index($0, key) == 1 && length($0) > length(key) { found = 1 }
+        END { exit !found }' "$list"
+}
+
+has_entry() {
+    local dir IFS=:
+    for dir in ${XDG_DATA_HOME:-$HOME/.local/share}:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}; do
+        [[ -f $dir/applications/$1 ]] && return 0
+    done
+    return 1
+}
+
+verb_defaults() {
+    section defaults
+    command -v xdg-mime >/dev/null || fail 'xdg-mime is not installed (package: xdg-utils)'
+    command -v gsettings >/dev/null || fail 'gsettings is not installed (package: glib2)'
+    local line type taken
+    local -a words
+    for line in "${DEFAULT_APPS[@]}"; do
+        read -ra words <<< "$line"
+        if ! has_entry "${words[0]}"; then say "skipped  ${words[0]} — not installed"; continue; fi
+        taken=
+        for type in "${words[@]:1}"; do
+            if chosen "$type"; then taken=$type; break; fi
+        done
+        if [[ -n $taken ]]; then
+            say "kept     what opens $taken, and the rest of its line"
+            continue
+        fi
+        act xdg-mime default "${words[0]}" "${words[@]:1}" || fail 'xdg-mime failed'
+        say "${words[0]}  ${words[*]:1}"
+    done
+    act gsettings set org.gnome.desktop.interface color-scheme prefer-dark \
+        && act gsettings set org.gnome.desktop.interface icon-theme impasto \
+        || fail 'gsettings failed'
+    if (( ! DRY )) && [[ $(gsettings get org.gnome.desktop.interface icon-theme) != "'impasto'" ]]; then
+        fail 'the GTK settings did not persist: run it inside the session'
+    fi
+    say 'dark GTK, impasto icons'
+}
+
 # Shake-to-find magnifies the pointer, so it has to be a vector cursor. Fetches
 # Bibata's SVGs into the state directory and has compositor.py recolour and
 # compile them. The shell rebuilds it on wallpaper changes after that.
@@ -535,6 +590,18 @@ verb_thunar() {
     if pgrep -x thunar >/dev/null; then fail 'close Thunar first: it writes to the same channel as it exits'; fi
     act python3 "$THEME_MANAGER" apply-thunar
     say 'settings and right-click menu applied'
+}
+
+# Vencord rewrites settings while Vesktop is running, so this is never part of
+# install, update, or palette pushes. The generated CSS remains independent.
+verb_vesktop() {
+    section vesktop
+    command -v vesktop >/dev/null || fail 'vesktop is not installed'
+    if pgrep -x vesktop >/dev/null; then
+        fail 'close Vesktop first: Vencord rewrites its settings while it runs'
+    fi
+    act python3 "$THEME_MANAGER" apply-vesktop
+    say 'theme enabled'
 }
 
 
@@ -620,10 +687,12 @@ main() {
         sync)      if (( WATCH )); then verb_watch; else verb_sync; fi ;;
         system)    verb_system ;;
         plugins)   verb_plugins ;;
+        defaults)  verb_defaults ;;
         cursors)   verb_cursors ;;
         spotify)   verb_spotify ;;
         vscodium)  verb_vscodium ;;
         thunar)    verb_thunar ;;
+        vesktop)   verb_vesktop ;;
         check)     verb_check ;;
         help|-h|--help) usage ;;
         *)         fail "unknown command: $verb (./setup help)" ;;

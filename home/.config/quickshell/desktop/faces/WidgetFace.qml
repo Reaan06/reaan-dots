@@ -20,6 +20,10 @@ import "../../services"
 Item {
     id: root
 
+    // Child marks, body content, and custom extras belong to the card, even
+    // when a service value or animation briefly exceeds its allotted bounds.
+    clip: true
+
     // The module's name in the corner, so widgets identify themselves without a
     // hover.
     property string label: ""
@@ -41,6 +45,10 @@ Item {
     // The reading's size: the same for every family except the band, which has
     // height to spare.
     property int readingSize: Theme.fontSizeWidget
+
+    // The caption's size, overridable by faces whose secondary summary needs
+    // the same emphasis as the main reading.
+    property int noteSize: Theme.fontSizeSmall
 
     // The fraction of the width given to `extra`; 0 for a square. Declared
     // rather than derived from `extra`'s contents, because bindings do not
@@ -139,7 +147,7 @@ Item {
             text: root.note
             elide: Text.ElideRight
             font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontSizeSmall
+            font.pixelSize: root.noteSize
             color: root.ink.muted
         }
     }

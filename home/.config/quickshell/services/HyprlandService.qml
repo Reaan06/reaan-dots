@@ -29,7 +29,98 @@ QtObject {
     readonly property int maximum: SettingsService.workspaceMax
 
     property int activeId: 1
+    property string activeMonitorName: ""
     property var occupiedIds: []
+    // Complete rows from `hyprctl workspaces -j`; overview consumers keep the
+    // global properties above while bars use these monitor-local helpers.
+    property var workspaceRows: []
+    readonly property var workspaceRowsByMonitor: {
+        const grouped = {}
+        for (const row of root.workspaceRows) {
+            if (!grouped[row.monitor])
+                grouped[row.monitor] = []
+            grouped[row.monitor].push(row)
+        }
+        return grouped
+    }
+
+    function rowsForMonitor(monitorName: string): var {
+        const name = monitorName || root.activeMonitorName
+        return (root.workspaceRowsByMonitor[name] ?? [])
+            .filter(row => row.id > 0)
+            .slice()
+            .sort((left, right) => left.id - right.id)
+    }
+
+    function rowByIdOnMonitor(monitorName: string, workspaceId: int): var {
+        const name = monitorName || root.activeMonitorName
+        return (root.workspaceRowsByMonitor[name] ?? [])
+            .find(row => row.id === workspaceId) ?? null
+    }
+
+    function slotCount(monitorName: string): int {
+        return SettingsService.workspaceMax
+    }
+
+    // `r~N` selects a monitor-local slot, while workspace rows use global IDs.
+    function workspaceIdsForMonitor(monitorName: string): var {
+        const name = monitorName || root.activeMonitorName
+        const maximum = SettingsService.workspaceMax
+        if (!name || maximum <= 0)
+            return []
+
+        const otherMonitorIds = []
+        for (const row of root.workspaceRows) {
+            if (row.monitor !== name && row.id > 0
+                    && otherMonitorIds.indexOf(row.id) < 0)
+                otherMonitorIds.push(row.id)
+        }
+
+        const ids = []
+        for (let id = 1; ids.length < maximum; id++) {
+            if (otherMonitorIds.indexOf(id) < 0)
+                ids.push(id)
+        }
+        return ids
+    }
+
+    function workspaceIdForSlot(monitorName: string, slot: int): int {
+        if (slot < 1 || slot > SettingsService.workspaceMax)
+            return 0
+        return root.workspaceIdsForMonitor(monitorName)[slot - 1] ?? 0
+    }
+
+    function rowForSlot(monitorName: string, slot: int): var {
+        const workspaceId = root.workspaceIdForSlot(monitorName, slot)
+        return workspaceId > 0
+            ? root.rowByIdOnMonitor(monitorName, workspaceId) : null
+    }
+
+    function workspaceSlotForId(monitorName: string, workspaceId: int): int {
+        if (workspaceId < 1)
+            return 0
+        const slot = root.workspaceIdsForMonitor(monitorName).indexOf(workspaceId)
+        return slot >= 0 ? slot + 1 : 0
+    }
+
+    function isOccupiedOnMonitor(monitorName: string, slot: int): bool {
+        return (root.rowForSlot(monitorName, slot)?.windows ?? 0) > 0
+    }
+
+    function isVisibleOnMonitor(monitorName: string, slot: int): bool {
+        const name = monitorName || root.activeMonitorName
+        const row = root.rowForSlot(monitorName, slot)
+        const workspaceId = root.workspaceIdForSlot(monitorName, slot)
+        return slot <= SettingsService.workspaceCount
+            || !!row && row.windows > 0
+            || (name === root.activeMonitorName && workspaceId === root.activeId)
+    }
+
+    function isFocusedOnMonitor(monitorName: string, slot: int): bool {
+        const name = monitorName || root.activeMonitorName
+        return name === root.activeMonitorName
+            && root.workspaceIdForSlot(monitorName, slot) === root.activeId
+    }
 
     function isOccupied(workspaceId: int): bool {
         return root.occupiedIds.indexOf(workspaceId) >= 0
@@ -54,6 +145,24 @@ QtObject {
 
     function focus(workspaceId: int): void {
         Hyprland.dispatch(`hl.dsp.focus({ workspace = ${workspaceId} })`)
+    }
+
+    function luaString(value: string): string {
+        return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')
+            .replace(/\r/g, "\\r").replace(/\n/g, "\\n").replace(/\t/g, "\\t")}"`
+    }
+
+    function focusOnMonitor(monitorName: string, slot: int): void {
+        if (!monitorName) {
+            Hyprland.dispatch(`hl.dsp.focus({ workspace = "r~${slot}", `
+                + `on_current_monitor = true })`)
+        } else {
+            Hyprland.dispatch(`function() `
+                + `hl.dispatch(hl.dsp.focus({ monitor = ${root.luaString(monitorName)} })); `
+                + `hl.dispatch(hl.dsp.focus({ workspace = "r~${slot}", `
+                + `on_current_monitor = true })) end`)
+        }
+        root.refresh()
     }
 
     function refresh(): void {
@@ -187,6 +296,20 @@ QtObject {
         root.loadClients()
     }
 
+    function moveClientOnMonitor(address: string, monitorName: string, slot: int): void {
+        const move = `hl.dsp.window.move({ workspace = "r~${slot}", `
+            + `window = "address:${address}", follow = false })`
+        if (!monitorName) {
+            Hyprland.dispatch(move)
+        } else {
+            Hyprland.dispatch(`function() `
+                + `hl.dispatch(hl.dsp.focus({ monitor = ${root.luaString(monitorName)} })); `
+                + `hl.dispatch(${move}) end`)
+        }
+        root.refresh()
+        root.loadClients()
+    }
+
     // ── BIND NAMES ──────────────────────────────────────────────────────────
     //
     // `hyprctl binds` returns a modifier mask and key; `hl.bind` wants
@@ -220,6 +343,7 @@ QtObject {
                 const workspaces = root.parseJson(text)
                 if (!Array.isArray(workspaces))
                     return
+                root.workspaceRows = workspaces
                 root.occupiedIds = workspaces
                     .filter(workspace => workspace.windows > 0)
                     .map(workspace => workspace.id)
@@ -233,8 +357,10 @@ QtObject {
         stdout: StdioCollector {
             onStreamFinished: {
                 const workspace = root.parseJson(text)
-                if (workspace && typeof workspace.id === "number")
+                if (workspace && typeof workspace.id === "number") {
                     root.activeId = workspace.id
+                    root.activeMonitorName = workspace.monitor || ""
+                }
             }
         }
     }
