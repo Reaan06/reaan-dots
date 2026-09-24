@@ -5,6 +5,7 @@ singleton Palettes           1.0 theme/Palettes.qml
 singleton Motion             1.0 theme/Motion.qml
 singleton Board              1.0 theme/Board.qml
 singleton Tr                 1.0 theme/Tr.qml
+ScreenMetrics                1.0 theme/ScreenMetrics.qml
 
 singleton SettingsService    1.0 services/SettingsService.qml
 singleton ThemeService       1.0 services/ThemeService.qml

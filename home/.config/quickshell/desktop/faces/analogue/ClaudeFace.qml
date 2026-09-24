@@ -72,6 +72,14 @@ Instrument {
                 font.pixelSize: Theme.fontSizeLabel
                 color: face.ink.muted
             }
+        },
+
+        MouseArea {
+            parent: face
+            visible: !AuthService.claudeAuthenticated
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            onClicked: AuthService.login("claude")
         }
     ]
 }

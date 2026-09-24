@@ -110,6 +110,10 @@ Item {
         onClicked: {
             if (root.button)
                 ModuleService.togglePanel(root.door.panel)
+            else if (root.moduleId === "claude" && !AuthService.claudeAuthenticated)
+                AuthService.login("claude")
+            else if (root.moduleId === "chatgpt" && !AuthService.chatgptAuthenticated)
+                AuthService.login("chatgpt")
             // The player with no player open has nothing to open onto.
             else if (ModuleService.has(root.moduleId))
                 ModuleService.activate(root.moduleId, root.origin)

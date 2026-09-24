@@ -27,16 +27,18 @@ Rectangle {
 
     // Inside the one capsule it drops its own capsule and padding.
     property bool chromeless: false
+    property string monitorName: ""
+    property var metrics: null
 
-    readonly property int dotSize: 6
-    readonly property int activeWidth: 22
-    readonly property int slotSpacing: 8
+    readonly property int dotSize: root.metrics ? root.metrics.px(6) : 6
+    readonly property int activeWidth: root.metrics ? root.metrics.px(22) : 22
+    readonly property int slotSpacing: root.metrics ? root.metrics.px(8) : 8
 
     implicitHeight: Theme.capsuleHeight
     // Each slot carries its own gap, so a collapsed one takes no space; the
     // spare gap is subtracted here.
     implicitWidth: layout.implicitWidth - root.slotSpacing
-        + (root.chromeless ? 0 : 20)
+        + (root.chromeless ? 0 : (root.metrics ? root.metrics.px(20) : 20))
     radius: Theme.radiusPill
 
     color: root.chromeless ? "transparent" : Theme.island
@@ -53,16 +55,20 @@ Rectangle {
         // animate. A Repeater over only the visible ones would destroy items
         // and make the rest jump.
         Repeater {
-            model: HyprlandService.maximum
+            model: HyprlandService.slotCount(root.monitorName)
 
             Item {
                 id: slot
 
                 required property int index
-                readonly property int workspaceId: slot.index + 1
-                readonly property bool shown: HyprlandService.isVisible(slot.workspaceId)
-                readonly property bool focused: HyprlandService.activeId === slot.workspaceId
-                readonly property bool occupied: HyprlandService.isOccupied(slot.workspaceId)
+                readonly property int workspaceId: HyprlandService.workspaceIdForSlot(
+                    root.monitorName, slot.index + 1)
+                readonly property bool shown: HyprlandService.isVisibleOnMonitor(
+                    root.monitorName, slot.index + 1)
+                readonly property bool focused: HyprlandService.isFocusedOnMonitor(
+                    root.monitorName, slot.index + 1)
+                readonly property bool occupied: HyprlandService.isOccupiedOnMonitor(
+                    root.monitorName, slot.index + 1)
 
                 Layout.preferredWidth: slot.shown
                     ? (slot.focused ? root.activeWidth : root.dotSize) + root.slotSpacing
@@ -99,7 +105,7 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: HyprlandService.focus(slot.workspaceId)
+                    onClicked: HyprlandService.focusOnMonitor(root.monitorName, slot.index + 1)
                 }
             }
         }

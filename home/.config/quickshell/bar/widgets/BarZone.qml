@@ -28,6 +28,8 @@ Row {
     property bool chromeless: false
 
     property string origin: "zone"
+    property string monitorName: ""
+    property var metrics: null
 
     readonly property var groups: {
         const out = []
@@ -51,7 +53,8 @@ Row {
         return out
     }
 
-    spacing: root.chromeless ? 14 : Theme.capsuleSpacing
+    spacing: root.metrics ? root.metrics.px(root.chromeless ? 14 : Theme.capsuleSpacing)
+        : (root.chromeless ? 14 : Theme.capsuleSpacing)
 
     Repeater {
         model: root.groups
@@ -63,6 +66,8 @@ Row {
             items: modelData.items
             chromeless: root.chromeless
             origin: root.origin
+            monitorName: root.monitorName
+            metrics: root.metrics
         }
     }
 
@@ -73,6 +78,8 @@ Row {
         property var items: []
         property bool chromeless: false
         property string origin: "zone"
+        property string monitorName: ""
+        property var metrics: null
 
         readonly property bool workspaces: group.kind === "workspaces"
 
@@ -108,8 +115,10 @@ Row {
         Item {
             id: shadow
 
-            readonly property int reach: Theme.shadowBarRange + 4
-            readonly property int spread: Theme.shadowBarSpread
+            readonly property int reach: group.metrics ? group.metrics.px(Theme.shadowBarRange + 4)
+                : Theme.shadowBarRange + 4
+            readonly property int spread: group.metrics ? group.metrics.px(Theme.shadowBarSpread)
+                : Theme.shadowBarSpread
 
             visible: SettingsService.windowShadow && !group.chromeless
             x: -shadow.reach
@@ -122,7 +131,8 @@ Row {
             layer.effect: MultiEffect {
                 blurEnabled: true
                 blur: 1
-                blurMax: Theme.shadowBarRange - Theme.shadowBarSpread
+                blurMax: group.metrics ? group.metrics.px(Theme.shadowBarRange - Theme.shadowBarSpread)
+                    : Theme.shadowBarRange - Theme.shadowBarSpread
             }
 
             Rectangle {
@@ -141,6 +151,8 @@ Row {
             active: group.workspaces
             sourceComponent: WorkspacesWidget {
                 chromeless: group.chromeless
+                monitorName: group.monitorName
+                metrics: group.metrics
             }
         }
 

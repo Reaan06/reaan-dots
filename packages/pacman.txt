@@ -43,7 +43,7 @@ adwaita-fonts                # the GTK windows' type
 # ── TERMINAL ────────────────────────────────────────────────────────────────
 
 kitty
-zsh
+fish
 starship
 less                         # kitty's scrollback pager, which base does not bring
 
@@ -74,8 +74,8 @@ pipewire-pulse               # what pactl talks to
 
 # ── TERMINAL PROGRAMS ───────────────────────────────────────────────────────
 
-fzf                          # .zshrc reaches for it, and fzf-lua needs it
-zoxide                       # .zshrc reaches for it if it is there
+fzf                          # Fish reaches for it, and fzf-lua needs it
+zoxide                       # Fish reaches for it if it is there
 fnm                          # the same
 fastfetch                    # the greeting, on `fa`
 btop                         # themed by the palette push
