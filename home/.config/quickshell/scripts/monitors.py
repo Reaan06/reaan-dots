@@ -26,6 +26,7 @@ by port, so a screen keeps its settings on another connector. Quickshell's
 """
 
 import json
+import math
 import re
 import shutil
 import subprocess
@@ -168,26 +169,51 @@ def group_modes(modes):
     ]
 
 
+def valid_coordinate(value):
+    """Whether a raw monitor coordinate is a finite numeric compositor value."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(float(value))
+    except (OverflowError, ValueError):
+        return False
+
+
+def valid_position(monitor):
+    """Whether both raw coordinates are finite numeric compositor positions."""
+    return valid_coordinate(monitor.get("x")) and valid_coordinate(monitor.get("y"))
+
+
+def safe_coordinate(value):
+    """Keep normal coordinates, substituting finite numeric zero for bad input."""
+    if not valid_coordinate(value):
+        return 0
+    return value or 0
+
+
 def described(monitor, names):
     modes = parse_modes(monitor.get("availableModes") or [])
     width = monitor.get("width") or 0
     height = monitor.get("height") or 0
     refresh = monitor.get("refreshRate") or 0.0
+    x = safe_coordinate(monitor.get("x"))
+    y = safe_coordinate(monitor.get("y"))
     return {
         "name": monitor.get("name") or "",
         "description": monitor.get("description") or "",
         "make": monitor.get("make") or "",
         "model": monitor.get("model") or "",
         "serial": monitor.get("serial") or "",
-        "x": monitor.get("x") or 0,
-        "y": monitor.get("y") or 0,
+        "x": x,
+        "y": y,
+        "positionValid": valid_position(monitor),
         "width": width,
         "height": height,
         "refresh": round(refresh, 2),
         # Same format as `availableModes`, so the current mode is one of the
         # rows.
         "mode": f"{width}x{height}@{refresh:.2f}" if width and height else "preferred",
-        "position": f"{monitor.get('x') or 0}x{monitor.get('y') or 0}",
+        "position": f"{x}x{y}",
         # Rounded before it is compared with the saved value: hyprctl reports
         # 1.25 as 1.2000000476837158, which would re-apply the profile on
         # every hotplug.
