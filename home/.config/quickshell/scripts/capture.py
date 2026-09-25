@@ -8,11 +8,12 @@
 # │                                                                          │
 # ╰──────────────────────────────────────────────────────────────────────────╯
 
-"""Screen capture: grab the whole screen, then crop and deliver.
+"""Screen capture: grab one output, then crop and deliver.
 
-`grab` saves a full-screen grim shot and prints its path; the shell's overlay
-draws it and the selection is made on top of it. `finish` crops that picture
-with ImageMagick and saves it, copies it, opens it in satty or runs tesseract.
+`grab` saves a grim shot of the requested output and prints its path; the
+shell's overlay draws it and the selection is made on top of it. `finish` crops
+that picture with ImageMagick and saves it, copies it, opens it in satty or runs
+tesseract.
 
 Selecting on a still picture means the crop is exactly what was on screen when
 the key was pressed, with no second capture and no screen freeze. A missing
@@ -20,6 +21,7 @@ tool is reported, never a crash, and nothing is saved or copied on failure.
 """
 
 import json
+import math
 import os
 import shutil
 import subprocess
@@ -143,11 +145,12 @@ def tools():
     })
 
 
-def grab():
-    """Capture the whole screen into the runtime directory.
+def grab(output=None):
+    """Capture one output into the runtime directory.
 
     Every crop is cut from this picture, so the result is what was on screen
     when the key was pressed, including menus that close once the pointer moves.
+    When output is omitted, grim keeps its whole-desktop default.
     """
     if not shutil.which("grim"):
         report(error="grim is not installed")
@@ -156,7 +159,11 @@ def grab():
                                     dir=str(runtime()))
     os.close(handle)
     path = Path(name)
-    result = run(["grim", str(path)])
+    command = ["grim"]
+    if output:
+        command.extend(["-o", output])
+    command.append(str(path))
+    result = run(command)
     if result is None or result.returncode != 0:
         path.unlink(missing_ok=True)
         report(error="grim took nothing")
@@ -167,7 +174,14 @@ def grab():
     width, height = 0, 0
     tool = magick()
     if tool:
-        size = run([tool, "identify", "-format", "%w %h", str(path)])
+        if tool == "magick":
+            command = [tool, "identify", "-format", "%w %h", str(path)]
+        else:
+            identify = shutil.which("identify")
+            command = ([identify, "-format", "%w %h", str(path)]
+                       if identify else
+                       [tool, str(path), "-format", "%w %h", "info:"])
+        size = run(command)
         if size is not None and size.returncode == 0:
             try:
                 width, height = (int(part) for part in size.stdout.split()[:2])
@@ -189,14 +203,78 @@ def parse(geometry):
     return x, y, width, height
 
 
+def parse_logical_geometry(geometry):
+    """Parse logical selection geometry without rounding its real values."""
+    try:
+        where, size = geometry.split(" ")
+        x, y = (float(part) for part in where.split(","))
+        width, height = (float(part) for part in size.split("x"))
+    except (ValueError, AttributeError):
+        return None
+    if width <= 0 or height <= 0:
+        return None
+    return x, y, width, height
+
+
+def parse_size(size):
+    """Parse a positive `widthxheight` pair; None for anything else."""
+    try:
+        width, height = (int(part) for part in size.split("x"))
+    except (ValueError, AttributeError):
+        return None
+    if width <= 0 or height <= 0:
+        return None
+    return width, height
+
+
+def scale_geometry(geometry, logical_width, logical_height, photo_width,
+                   photo_height):
+    """Map logical coordinates to photo pixels with independent axis scales."""
+    box = parse_logical_geometry(geometry)
+    if box is None or min(logical_width, logical_height, photo_width,
+                          photo_height) <= 0:
+        return geometry
+
+    def scaled(value, logical_size, photo_size):
+        # Match JavaScript Math.round, including ties toward positive infinity.
+        return math.floor(value * photo_size / logical_size + 0.5)
+
+    x, y, width, height = box
+    left = scaled(x, logical_width, photo_width)
+    top = scaled(y, logical_height, photo_height)
+    right = scaled(x + width, logical_width, photo_width)
+    bottom = scaled(y + height, logical_height, photo_height)
+    return f"{left},{top} {right - left}x{bottom - top}"
+
+
+def valid_size(size):
+    """Whether a parsed image size contains two positive integer dimensions."""
+    return (isinstance(size, (tuple, list)) and len(size) == 2
+            and all(type(value) is int and value > 0 for value in size))
+
+
+def reject_picture(picture, message):
+    """Refuse a capture and report even if its temporary source cannot be removed."""
+    try:
+        picture.unlink(missing_ok=True)
+    except OSError as error:
+        report(error=f"{message}; cannot remove source: {error}")
+    else:
+        report(error=message)
+
+
 def cut_out(picture, geometry):
     """Crop the rectangle, or return the whole picture when there is none.
 
     Returns the path to use, or None after reporting an error.
     """
-    box = parse(geometry) if geometry else None
-    if box is None:
+    if geometry == "":
         return picture
+
+    box = parse(geometry)
+    if box is None:
+        reject_picture(picture, "Invalid crop geometry")
+        return None
 
     tool = magick()
     if not tool:
@@ -237,11 +315,17 @@ def keep(cut, stamp):
     return saved
 
 
-def finish(source, geometry, destination):
+def finish(source, geometry, destination, logical_size=None, photo_size=None):
     picture = Path(source)
     if not picture.exists():
         report(error="The picture is gone")
         return
+    if geometry != "":
+        if not valid_size(logical_size) or not valid_size(photo_size):
+            reject_picture(picture, "Image dimensions unavailable for crop")
+            return
+        geometry = scale_geometry(geometry, *logical_size, *photo_size)
+
     if destination == "editor" and not shutil.which("satty"):
         picture.unlink(missing_ok=True)
         report(error="satty is not installed")
@@ -318,33 +402,40 @@ def main():
         tools()
         return
     if action == "grab":
-        grab()
+        grab(arguments[1] if len(arguments) > 1 else None)
         return
     if action == "drop" and len(arguments) > 1:
         drop(arguments[1])
         return
     if action != "finish" or len(arguments) < 2:
-        print("usage: capture.py [tools | grab | drop <picture> | "
+        print("usage: capture.py [tools | grab [output] | drop <picture> | "
               "finish <picture> [--geometry 'x,y wxh'] "
+              "[--logical-size WxH --photo-size WxH] "
               f"[--to {'|'.join(DESTINATIONS)}]]", file=sys.stderr)
         report(error=f"No such capture: {action}")
         return
 
     source = arguments[1]
     geometry = ""
+    logical_size = None
+    photo_size = None
     destination = "file"
     rest = arguments[2:]
     while rest:
         flag = rest.pop(0)
         if flag == "--geometry" and rest:
             geometry = rest.pop(0)
+        elif flag == "--logical-size" and rest:
+            logical_size = parse_size(rest.pop(0))
+        elif flag == "--photo-size" and rest:
+            photo_size = parse_size(rest.pop(0))
         elif flag == "--to" and rest:
             destination = rest.pop(0)
     if destination not in DESTINATIONS:
         report(error=f"No such destination: {destination}")
         return
 
-    finish(source, geometry, destination)
+    finish(source, geometry, destination, logical_size, photo_size)
 
 
 if __name__ == "__main__":
