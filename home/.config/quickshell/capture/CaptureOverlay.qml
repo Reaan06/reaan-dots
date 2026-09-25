@@ -32,11 +32,24 @@ PanelWindow {
     property real originX: 0
     property real originY: 0
 
+    readonly property string output: root.screen?.name ?? ""
+    readonly property var photo: CaptureService.photos[root.output] ?? null
+    readonly property var monitor: MonitorService.monitors.find(
+        item => item.name === root.output) ?? null
+    readonly property bool hasMonitorOrigin: CaptureService.monitorGeometryReady
+        && !!root.monitor
+        && root.monitor.positionValid === true
+        && root.monitor.x !== undefined && root.monitor.y !== undefined
+        && Number.isFinite(Number(root.monitor.x))
+        && Number.isFinite(Number(root.monitor.y))
+    readonly property real monitorX: root.hasMonitorOrigin ? Number(root.monitor.x) : 0
+    readonly property real monitorY: root.hasMonitorOrigin ? Number(root.monitor.y) : 0
+
     readonly property bool whole: CaptureService.shape === "screen"
     readonly property bool showing: root.whole
         || (root.selection.width > 1 && root.selection.height > 1)
 
-    visible: CaptureService.active
+    visible: CaptureService.active && !!root.photo
     color: "transparent"
 
     exclusionMode: ExclusionMode.Ignore
@@ -102,8 +115,8 @@ PanelWindow {
             id: shot
 
             anchors.fill: parent
-            source: CaptureService.photo === ""
-                ? "" : `file://${CaptureService.photo}`
+            source: root.photo?.path
+                ? `file://${root.photo.path}` : ""
             // Stretch, not fit: the image is this screen at the output's
             // physical resolution.
             fillMode: Image.Stretch
@@ -288,18 +301,24 @@ PanelWindow {
 
     // ── WINDOW LOOKUP ───────────────────────────────────────────────────────
 
-    // Topmost window containing the point. The surface covers the screen from
-    // its origin, so its coordinates are the compositor's. hyprctl lists
-    // windows bottom to top, so the last match is the visible one.
+    // Topmost window containing the point. Translate this output-local point
+    // to compositor coordinates for lookup, then keep the result output-local
+    // for drawing and cropping. hyprctl lists windows bottom to top, so the
+    // last match is the visible one.
     function windowUnder(x: real, y: real): rect {
+        if (!root.hasMonitorOrigin)
+            return Qt.rect(0, 0, 0, 0)
+        const globalX = x + root.monitorX
+        const globalY = y + root.monitorY
         const clients = HyprlandService.clientsOn(HyprlandService.activeId)
         let found = Qt.rect(0, 0, 0, 0)
         for (const client of clients) {
             const at = client.at ?? [0, 0]
             const size = client.size ?? [0, 0]
-            if (x >= at[0] && x <= at[0] + size[0]
-                && y >= at[1] && y <= at[1] + size[1])
-                found = Qt.rect(at[0], at[1], size[0], size[1])
+            if (globalX >= at[0] && globalX <= at[0] + size[0]
+                && globalY >= at[1] && globalY <= at[1] + size[1])
+                found = Qt.rect(at[0] - root.monitorX,
+                                at[1] - root.monitorY, size[0], size[1])
         }
         return found
     }
@@ -307,8 +326,16 @@ PanelWindow {
     // Takes the capture. Screen mode passes no rectangle, so nothing is
     // cropped.
     function take(): void {
+        const needsOrigin = CaptureService.shape === "window"
+            || (CaptureService.kind === "video" && !root.whole)
+        if (needsOrigin && !root.hasMonitorOrigin) {
+            OsdService.requested(CaptureService.marks.error,
+                                 `Monitor geometry unavailable for ${root.output}`, -1)
+            return
+        }
         if (root.whole) {
-            CaptureService.fire(0, 0, 0, 0)
+            CaptureService.fire(root.output, 0, 0, 0, 0, root.width, root.height,
+                                root.monitorX, root.monitorY)
             return
         }
         if (CaptureService.shape === "window" && root.selection.width < 4) {
@@ -319,7 +346,8 @@ PanelWindow {
         }
         if (root.selection.width < 4 || root.selection.height < 4)
             return
-        CaptureService.fire(root.selection.x, root.selection.y,
-                            root.selection.width, root.selection.height)
+        CaptureService.fire(root.output, root.selection.x, root.selection.y,
+                            root.selection.width, root.selection.height,
+                            root.width, root.height, root.monitorX, root.monitorY)
     }
 }

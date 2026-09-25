@@ -11,15 +11,14 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 
 import "../theme"
 
-// The capture surface. `capture.py grab` photographs the whole screen, the
-// overlay draws that picture with the selection on top, and `capture.py
-// finish` crops it and sends it to its destination. Nothing is frozen, and the
-// result is exactly what was on screen when the key was pressed, menus
-// included.
+// Each output gets its own `capture.py grab` photograph and overlay. The
+// chosen output's picture is cropped by `capture.py finish`; other temporary
+// pictures are discarded. Nothing is frozen, and menus remain in the capture.
 //
 // Shape and kind are remembered (`captureShape`, `captureKind`); the
 // destination resets to a file every time.
@@ -43,25 +42,99 @@ Singleton {
 
     // ── SURFACE ─────────────────────────────────────────────────────────────
 
-    // The photo and its size in physical pixels. The surface works in logical
-    // coordinates and the crop in physical ones; `ratio` converts.
-    property string photo: ""
-    property int photoWidth: 0
-    property int photoHeight: 0
+    // Photos are keyed by connector name so each overlay can only draw and
+    // finish the image captured from its own output.
+    property var photos: ({})
+    property var outputs: []
+    property var received: []
+    property int pending: 0
+    property string captureError: ""
 
     property bool active: false
     property bool busy: false
+    property int generation: 0
+
+    // This binding is driven by Quickshell's notifiable screens list and the
+    // monitor service's refreshed geometry rows. A topology change invalidates
+    // a delayed, running, or visible capture without depending on an overlay.
+    readonly property string screenTopology: {
+        const screens = []
+        for (const screen of Quickshell.screens)
+            screens.push(`${screen.name}:${screen.width}x${screen.height}`)
+        const monitors = []
+        for (const monitor of MonitorService.monitors ?? [])
+            monitors.push(`${monitor.name}:${monitor.x}:${monitor.y}:`
+                           + `${monitor.width}:${monitor.height}:${monitor.disabled}:`
+                           + `${monitor.positionValid}`)
+        return `${screens.sort().join("|")}#${monitors.sort().join("|")}`
+    }
+    onScreenTopologyChanged: root.invalidate()
+
+    readonly property Connections monitorEvents: Connections {
+        target: Hyprland
+
+        function onRawEvent(event): void {
+            switch (event.name) {
+            case "configreloaded":
+            case "monitoradded":
+            case "monitoraddedv2":
+            case "monitorremoved":
+            case "monitorremovedv2":
+                root.monitorLayoutDirty = true
+                root.invalidate()
+                if (MonitorService.reader.running)
+                    root.monitorRefreshQueued = true
+                else
+                    root.refreshMonitorLayout()
+                break
+            }
+        }
+    }
+
+    readonly property Connections monitorRows: Connections {
+        target: MonitorService
+
+        function onMonitorsChanged(): void {
+            if (!root.monitorRefreshPending || root.monitorRefreshQueued)
+                return
+            root.monitorRefreshDataReady = true
+            root.finishMonitorRefresh()
+        }
+    }
+
+    readonly property Connections monitorReader: Connections {
+        target: MonitorService.reader
+
+        function onExited(): void {
+            if (root.monitorRefreshQueued) {
+                root.refreshMonitorLayout()
+                return
+            }
+            if (!root.monitorRefreshPending)
+                return
+            root.monitorRefreshExited = true
+            root.finishMonitorRefresh()
+        }
+    }
+
+    property int grabIndex: 0
+    property string grabOutput: ""
+    property int grabGeneration: -1
+    property string grabText: ""
+    property bool grabExited: false
+    property bool grabStreamFinished: false
+    property bool grabHandled: false
+    property bool monitorLayoutDirty: false
+    property bool monitorRefreshPending: false
+    property bool monitorRefreshQueued: false
+    property bool monitorRefreshDataReady: false
+    property bool monitorRefreshExited: false
+    readonly property bool monitorGeometryReady:
+        !root.monitorLayoutDirty && !MonitorService.reader.running
 
     // Delay a caller closing a panel passes to `open()`, so the panel is gone
     // from the photo. It is the island's close animation, 0 with motion off.
     readonly property int settle: Theme.durationIslandGone
-
-    readonly property real ratio: {
-        const screen = Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
-        if (!screen || screen.width <= 0 || root.photoWidth <= 0)
-            return 1
-        return root.photoWidth / screen.width
-    }
 
     // ── OPTIONS ─────────────────────────────────────────────────────────────
 
@@ -98,74 +171,229 @@ Singleton {
     // shape is passed along with it.
     signal recordRequested(string shape, string geometry)
 
+    function refreshMonitorLayout(): void {
+        root.monitorRefreshPending = true
+        root.monitorRefreshQueued = false
+        root.monitorRefreshDataReady = false
+        root.monitorRefreshExited = false
+        MonitorService.load()
+    }
+
+    function finishMonitorRefresh(): void {
+        if (!root.monitorRefreshPending || !root.monitorRefreshDataReady
+            || !root.monitorRefreshExited)
+            return
+        root.monitorRefreshPending = false
+        root.monitorLayoutDirty = false
+    }
+
     // Empty `shape`/`kind` keep the last choice.
     function open(shape: string, kind: string, destination: string, after: int): void {
-        if (root.active || root.busy)
+        if (root.active || root.busy || root.shooter.running)
             return
+        root.generation += 1
         if (shape !== "")
             root.setShape(shape)
         if (kind !== "")
             root.setKind(kind)
         root.to = destination !== "" && root.offers(destination) ? destination : "file"
+
+        const requested = []
+        for (const screen of Quickshell.screens) {
+            const output = screen?.name ?? ""
+            if (output !== "" && !requested.includes(output))
+                requested.push(output)
+        }
+        if (requested.length === 0) {
+            OsdService.requested(root.marks.error, "No screens to capture", -1)
+            return
+        }
+
+        root.clearPhotos("")
+        root.photos = ({})
+        root.outputs = requested
+        root.received = []
+        root.pending = requested.length
+        root.grabIndex = 0
+        root.captureError = ""
         root.busy = true
         root.launch.interval = after
         root.launch.restart()
     }
 
-    // Escape or a click on nothing. Also deletes the photo, so a cancelled
-    // capture leaves no file behind.
-    function cancel(): void {
-        if (!root.active)
-            return
-        root.active = false
-        if (root.photo !== "") {
-            Quickshell.execDetached([root.script, "drop", root.photo])
-            root.photo = ""
-        }
+    function dropPath(path: string): void {
+        if (path !== "")
+            Quickshell.execDetached([root.script, "drop", path])
     }
 
-    // Logical coordinates. An empty box means the whole screen: no crop.
-    function fire(x: real, y: real, width: real, height: real): void {
+    // Delete every temporary picture except the one being passed to finish.
+    function clearPhotos(keepPath: string): void {
+        for (const output of Object.keys(root.photos)) {
+            const path = root.photos[output]?.path ?? ""
+            if (path !== keepPath)
+                root.dropPath(path)
+        }
+        root.photos = ({})
+    }
+
+    function grabbed(output: string, generation: int, text: string): void {
+        let report
+        try {
+            report = JSON.parse(text)
+        } catch (error) {
+            report = null
+        }
+
+        if (generation !== root.generation || !root.busy
+            || !root.outputs.includes(output) || root.received.includes(output)) {
+            root.dropPath(report?.path ?? "")
+            return
+        }
+        root.received = [...root.received, output]
+
+        const path = report?.path ?? ""
+        if (!report || report.error || path === "") {
+            if (path !== "")
+                root.dropPath(path)
+            if (root.captureError === "")
+                root.captureError = report?.error ?? "Could not capture a screen"
+        } else {
+            root.photos = Object.assign({}, root.photos, {
+                [output]: {
+                    path: path,
+                    width: Number(report.width) || 0,
+                    height: Number(report.height) || 0
+                }
+            })
+        }
+
+        root.pending = Math.max(0, root.pending - 1)
+        if (root.pending > 0)
+            return
+
+        root.busy = false
+
+        const complete = root.outputs.every(name => !!root.photos[name]?.path)
+        if (root.captureError !== "" || !complete) {
+            const message = root.captureError !== ""
+                ? root.captureError : "Could not capture every screen"
+            root.clearPhotos("")
+            root.outputs = []
+            root.received = []
+            root.pending = 0
+            root.captureError = ""
+            OsdService.requested(root.marks.error, message, -1)
+            return
+        }
+
+        root.pending = 0
+        root.active = true
+        root.opened()
+    }
+
+    // The singleton owns the worker, so removed overlays cannot strand a
+    // pending callback. Its generation token rejects and drops late results.
+    function startGrab(): void {
+        if (!root.busy || root.launch.running || root.grabber.running
+            || root.grabIndex >= root.outputs.length)
+            return
+        const output = root.outputs[root.grabIndex]
+        root.grabIndex += 1
+        root.grabOutput = output
+        root.grabGeneration = root.generation
+        root.grabText = ""
+        root.grabExited = false
+        root.grabStreamFinished = false
+        root.grabHandled = false
+        root.grabber.command = [root.script, "grab", output]
+        root.grabber.running = true
+    }
+
+    function finishGrab(): void {
+        if (!root.grabExited || !root.grabStreamFinished || root.grabHandled)
+            return
+        root.grabHandled = true
+        root.grabbed(root.grabOutput, root.grabGeneration, root.grabText)
+        root.grabText = ""
+        root.startGrab()
+    }
+
+    function invalidate(): void {
+        if (!root.active && !root.busy)
+            return
+        root.generation += 1
+        root.launch.stop()
+        root.active = false
+        root.busy = false
+        root.clearPhotos("")
+        root.outputs = []
+        root.received = []
+        root.pending = 0
+        root.grabIndex = 0
+        root.captureError = ""
+    }
+
+    // Escape or a click on nothing. Late worker results are dropped by the
+    // generation guard rather than being attached to a later capture.
+    function cancel(): void {
+        root.invalidate()
+    }
+
+    // Logical coordinates local to `output`. An empty box means that output's
+    // whole screen; video geometry is translated back to compositor space.
+    function fire(output: string, x: real, y: real, width: real, height: real,
+                  surfaceWidth: real, surfaceHeight: real,
+                  screenX: real, screenY: real): void {
         if (!root.active)
             return
+        const picture = root.photos[output]
+        if (!picture?.path)
+            return
+
         const whole = width <= 0 || height <= 0
-        const picture = root.photo
         const kind = root.kind
         const destination = root.to
 
-        // Hide the surface first, or it would end up in a recording.
+        // Hide every surface before saving or starting a recording.
         root.active = false
-        root.photo = ""
+        root.clearPhotos(picture.path)
+        root.outputs = []
+        root.received = []
 
         if (kind === "video") {
-            // Recordings are of the live screen, so the photo is discarded
-            // and only the box is passed on. `shell.qml` connects this to the
-            // recorder, which keeps the two services free of a cycle.
-            Quickshell.execDetached([root.script, "drop", picture])
+            // RecorderService remains global; only this overlay's still image
+            // is discarded and the selected box is sent in compositor space.
+            root.dropPath(picture.path)
             root.recordRequested(whole ? "screen" : root.shape,
-                                 whole ? "" : root.box(x, y, width, height))
+                                 whole ? "" : root.box(x + screenX, y + screenY,
+                                                       width, height))
             return
         }
 
-        const command = [root.script, "finish", picture]
-        if (!whole)
-            command.push("--geometry", root.crop(x, y, width, height))
+        const command = [root.script, "finish", picture.path]
+        if (!whole) {
+            command.push("--geometry", root.cropGeometry(x, y, width, height))
+            if (surfaceWidth > 0 && surfaceHeight > 0
+                && picture.width > 0 && picture.height > 0) {
+                command.push("--logical-size", `${surfaceWidth}x${surfaceHeight}`)
+                command.push("--photo-size", `${picture.width}x${picture.height}`)
+            }
+        }
         command.push("--to", destination)
         root.shooter.command = command
         root.shooter.running = true
     }
 
-    // `box` is in compositor (logical) coordinates, for the recorder; `crop`
-    // is in the photo's pixels.
+    // Preserve fractional selection coordinates until capture.py scales and
+    // rounds the screenshot crop in photo pixels.
+    function cropGeometry(x: real, y: real, width: real, height: real): string {
+        return `${x},${y} ${width}x${height}`
+    }
+
+    // The recorder receives compositor (logical) coordinates rounded as before.
     function box(x: real, y: real, width: real, height: real): string {
         return `${Math.round(x)},${Math.round(y)} `
              + `${Math.round(width)}x${Math.round(height)}`
-    }
-
-    function crop(x: real, y: real, width: real, height: real): string {
-        const r = root.ratio
-        return `${Math.round(x * r)},${Math.round(y * r)} `
-             + `${Math.round(width * r)}x${Math.round(height * r)}`
     }
 
     // ── PROCESSES ───────────────────────────────────────────────────────────
@@ -186,32 +414,26 @@ Singleton {
     }
 
     readonly property Timer launch: Timer {
-        onTriggered: root.grabber.running = true
+        onTriggered: root.startGrab()
     }
 
     readonly property Process grabber: Process {
-        command: [root.script, "grab"]
         stdout: StdioCollector {
             onStreamFinished: {
-                root.busy = false
-                let report
-                try {
-                    report = JSON.parse(text)
-                } catch (error) {
-                    return
-                }
-                if (report.error) {
-                    OsdService.requested(root.marks.error, report.error, -1)
-                    return
-                }
-                root.photo = report.path ?? ""
-                root.photoWidth = report.width ?? 0
-                root.photoHeight = report.height ?? 0
-                if (root.photo === "")
-                    return
-                root.active = true
-                root.opened()
+                root.grabText = text
+                root.grabStreamFinished = true
+                root.finishGrab()
             }
+        }
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text.trim() !== "")
+                    console.warn("capture:", text.trim())
+            }
+        }
+        onExited: {
+            root.grabExited = true
+            root.finishGrab()
         }
     }
 
