@@ -23,7 +23,7 @@ Make capture surfaces monitor-local: each display shows its own image, and a sel
 - Strategy: stacked PRs to `main`, selected by the user.
 - Slice 1: output-aware capture primitives and `tests/test_capture.py` (359 changed lines); branch `feat/quickshell-capture-foundation`, base `main`, commit `6b38c3f`, PR #15.
 - Slice 2: monitor-origin validity and `tests/test_monitors.py` (89 changed lines); branch `feat/quickshell-monitor-metadata`, based on Slice 1, commit `3a1fb13`, PR #16.
-- Slice 3: per-monitor QML service/overlay wiring and this feature document (465 changed lines); branch `feat/quickshell-region-capture`, based on Slice 2. The user accepted a size exception for this cohesive integration slice; request exact authorization to apply `size:exception` after the PR number exists.
+- Slice 3: per-monitor QML service/overlay wiring and this feature document (465 changed lines); branch `feat/quickshell-region-capture`, based on Slice 2, commit `79af861`. The user accepted a size exception for this cohesive integration slice; request exact authorization to apply `size:exception` after the PR number exists.
 - The earlier native review approved the complete candidate, not each isolated PR slice. Record any new slice-specific receipts with the corresponding PR evidence.
 
 ## Constraints
