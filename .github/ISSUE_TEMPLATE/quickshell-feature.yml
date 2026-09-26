@@ -1,0 +1,34 @@
+name: Quickshell feature
+description: Suggest a new Quickshell shell or widget feature
+title: "[Quickshell feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What should users be able to do?
+    validations:
+      required: true
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current behavior
+      description: What is missing today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed solution
+      description: Describe the interaction and keep the scope focused.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Verification and acceptance criteria
+      description: How can we verify that the feature works?
+    validations:
+      required: true
