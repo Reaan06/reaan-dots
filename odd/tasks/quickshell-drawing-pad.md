@@ -20,7 +20,7 @@ Add a small, independent drawing surface at the left edge of the primary display
 
 - [x] DP-1 Implement edge handle, drawing canvas/tools and PNG export with a focused bounded writer; check no collision with existing keybinds.
 - [x] DP-2 Run focused functional checks and a live Quickshell smoke check when possible; record failures or unavailable boundaries accurately.
-- [ ] DP-3 Commit the integrated work unit with its checks and docs; assess/review the candidate per native policy.
+- [x] DP-3 Commit the integrated work unit with its checks and docs; assess/review the candidate per native policy.
 
 ## Acceptance
 
@@ -38,8 +38,9 @@ Add a small, independent drawing surface at the left edge of the primary display
 - Writer: `./setup check`, `git diff --check`, and Lua `loadfile` passed; parent reran `./setup check` after PNG export correction and all categories passed. Isolated `qs --path` loaded without Theme (outside full shell configuration); not a functional smoke pass.
 - Independent verifier confirmed PNG export now calls `Canvas.save` instead of grabbing the item subtree. `qmllint` exits 255 silently on the new QML and on existing baseline `Bar.qml`; QML lint remains inconclusive, not a pass.
 - Runtime UI interaction, shortcut dispatch, actual generated PNG, and input-mask behavior have not been verified in a live session: installed Quickshell uses a different config, and launching a duplicate full shell may affect the user's session.
-- Native assessment before commit failed closed as unassessable because the working tree contained undeclared untracked files; retry committed range at the work-unit boundary.
+- Native assessment before commit failed closed as unassessable because the working tree contained undeclared untracked files. After commit, assessment also failed closed as unassessable (provider schema incompatibility); native review nevertheless created a medium-tier lineage for the exact committed range and approved it with one non-blocking informational reliability warning at `DrawingPad.qml:24`.
+- Work-unit commit `60cbc5d31f460a87d557c36d7e6d7a7dcaa97d4f` (base `f6ec129fe3759a056995c71b6e412a2aeada4ce4`) was acknowledged approved under lineage `review-c560c598fa98c870`. Native outcome is not a claim of live UI testing.
 
 ## Next step
 
-Stage the complete work-unit diff, inspect it, commit, then assess the committed range and follow its native review route. Live drawing/export remains a manual acceptance check.
+Live drawing/export and PNG inspection remain manual acceptance checks when this configuration is installed. No PR or feature-branch push has been performed.
