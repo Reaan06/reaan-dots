@@ -35,6 +35,7 @@ Add a small, independent drawing surface at the left edge of the primary display
 ## Progress
 
 - 2026-09-26: New feature form published to main as `f6ec129`; issue #18 confirmed open. Repository map completed; Super+Shift+S is reserved by capture, and Super+Shift+D by DPMS, so use Super+D (unbound in keybinds.lua). Engram mirror pending: local Engram binary predates the configured server protocol (`instance-id` unsupported).
+- 2026-09-26: Implemented full controls refinement inspired by Serpantinum's DrawAction without copying AGPL code: floating top bar (zoom in/out/reset, PNG save, clipboard copy via wl-copy, close), bottom dock toolbar (undo/redo, tool selection: pen, brush, marker, eraser, clear/trash), dual color slots with swap, tool size slider popup, color palette popup, multi-bristle brush painting, marker alpha rendering, and middle-click pan. Sliced into modular components (DrawingTopBar, DrawingDock, DrawingPopups, DrawingPad) to keep changes maintainable and clean.
 
 ## Verification evidence
 
