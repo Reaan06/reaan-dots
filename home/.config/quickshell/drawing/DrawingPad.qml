@@ -208,7 +208,7 @@ PanelWindow {
         const tempPath = "/tmp/quickshell_drawing_" + Date.now() + ".png"
         const ok = canvas.save(tempPath)
         if (ok) {
-            Quickshell.execDetached(["sh", "-c", "wl-copy -t image/png < " + tempPath + " && rm -f " + tempPath])
+            Quickshell.execDetached(["sh", "-c", 'wl-copy -t image/png < "$1" && rm -f "$1"', "_", tempPath])
             status = "Copied to clipboard"
             Quickshell.execDetached(["notify-send", "-a", "Quickshell", "Drawing", "Copied to clipboard"])
         } else {
