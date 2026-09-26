@@ -10,21 +10,24 @@ Add a small, independent drawing surface at the left edge of the primary display
 
 - Integrate with the existing Quickshell and Hyprland named-shortcut architecture; do not alter capture/annotation behavior or add a third-party drawing dependency.
 - Serpantinum's DrawAction is an interaction reference only; do not copy its AGPL-3.0 source.
-- Keep a clickable exposed handle; do not intercept input across the full desktop while closed.
+- In the closed state keep only a narrow transparent hover sensor on the left edge; reveal a styled clickable handle only while hovered. Do not intercept input across the full desktop while closed.
 - Report export failures; never silently claim success. No persistence across shell restarts, multi-screen drawing, brush presets, or clipboard export in this work unit.
 - TDD mode: disabled, per prior project ODD record (`quickshell-responsive-panel-sizing.md`); use ordinary checks. Runtime: `./setup check` and a Quickshell session smoke check if available.
 - Route: delegated direct writer (new QML plus shell and Hyprland wiring: multi-file write trigger). Parent owns issue, plan, readback, and review.
-- Delivery strategy: ask-on-risk. Forecast roughly 300–450 authored changed lines, excluding this progress artifact. If above 400, revisit review slicing without shrinking necessary tests or documentation.
+- Delivery strategy: feature-branch-chain selected by the user after the redesigned cumulative diff reached 473 authored lines. Draft PR #19 holds the reviewed initial integration (384 lines); a child PR targeting its branch will hold the visual/hover follow-up (forecast ~370–390 lines). Neither slice is to be merged alone as the final visual acceptance. Do not shrink UI or checks for the budget.
 
 ## Tasks
 
 - [x] DP-1 Implement edge handle, drawing canvas/tools and PNG export with a focused bounded writer; check no collision with existing keybinds.
 - [x] DP-2 Run focused functional checks and a live Quickshell smoke check when possible; record failures or unavailable boundaries accurately.
 - [x] DP-3 Commit the integrated work unit with its checks and docs; assess/review the candidate per native policy.
+- [x] DP-4 Redesign the pad to match the supplied dark dotted canvas and compact floating controls; hide the handle until the cursor nears the left edge.
+- [ ] DP-5 Verify the changed QML and live reload safely; sync the updated integration and confirm Super+D is bound on the active compositor.
+- [ ] DP-6 Commit, review and publish the follow-up visual work unit as a child PR targeting #19's branch; keep both drafts until live acceptance.
 
 ## Acceptance
 
-- A visible left-edge handle responds to hover and click; Super+D toggles the pad.
+- A transparent edge sensor reveals the handle on hover; the handle responds to click and disappears again when closed and not hovered. Super+D toggles the pad.
 - Pen and eraser strokes, undo and clear work; closing and reopening retains strokes during the running session.
 - Export saves a PNG under Pictures and reports outcome; the pad does not claim success for an invalid output.
 - Repository checks pass; runtime interaction is documented as verified or explicitly unverified.
@@ -43,4 +46,10 @@ Add a small, independent drawing surface at the left edge of the primary display
 
 ## Next step
 
-Live drawing/export and PNG inspection remain manual acceptance checks when this configuration is installed. No PR or feature-branch push has been performed.
+2026-09-26 user feedback after initial deployment: permanent turquoise tab is rejected; the pad should look closer to the supplied dark dotted reference. Initial `./setup sync` installed only three feature paths. Final Hyprland/Quickshell reload was paused for DP-4. PR #19 is draft and branch is published; follow-up work must update that PR. Engram mirror remains unavailable because the installed binary predates the server protocol.
+
+- DP-4 writer checks: `./setup check` and `git diff --check` pass. Static readback at 150px screen height leaves a 48px idle / 24px status canvas and a 46px scrollable toolbar. At an implausibly short 80px screen, a visible status may clip by 2px; live small-screen verification remains pending. Child work-unit diff before commit: 380 changed lines.
+
+## Next step
+
+Deploy the redesigned QML, reload the active compositor/shell, and inspect live startup logs and the Super+D binding. Pointer and PNG interactions still require an interactive check.
