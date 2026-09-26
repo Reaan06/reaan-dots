@@ -54,6 +54,9 @@ PanelWindow {
     readonly property color accentColor: Theme.accent || "#0a84ff"
     readonly property color textColor: Theme.text || "#ffffff"
     readonly property color textMuted: Theme.textMuted || "#8e8e93"
+    readonly property color cardBackground: Theme.surface || "#141414"
+    readonly property color cardBorder: Theme.border || "#282828"
+    readonly property color dotsColor: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.7)
 
     function toggle(): void {
         open = !open
@@ -228,9 +231,9 @@ PanelWindow {
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
     mask: Region {
-        x: 0
+        x: root.open ? 14 : 0
         y: root.open ? root.cardY : Math.round(root.height / 2 - 44)
-        width: root.open ? root.width : (root.hovered ? 28 : 5)
+        width: root.open ? root.cardWidth : (root.hovered ? 28 : 5)
         height: root.open ? root.cardHeight : 88
     }
 
@@ -246,8 +249,8 @@ PanelWindow {
         width: root.cardWidth
         height: root.cardHeight
         radius: 18
-        color: "#181822"
-        border.color: "#383642"
+        color: root.cardBackground
+        border.color: root.cardBorder
         border.width: 1
         clip: true
 
@@ -292,10 +295,14 @@ PanelWindow {
                         renderTarget: Canvas.Image
                         onWidthChanged: requestPaint()
                         onHeightChanged: requestPaint()
+                        Connections {
+                            target: root
+                            function onDotsColorChanged() { dots.requestPaint() }
+                        }
                         onPaint: {
                             const ctx = getContext("2d")
                             ctx.clearRect(0, 0, width, height)
-                            ctx.fillStyle = "#3e3b4a"
+                            ctx.fillStyle = root.dotsColor
                             const spacing = 18
                             for (let x = spacing / 2; x < width; x += spacing) {
                                 for (let y = spacing / 2; y < height; y += spacing) {
@@ -496,19 +503,20 @@ PanelWindow {
 
     // Left-edge sensor & handle:
     // Invisible 5px sensor captures hover; expands to 28px on hover showing the chevron handle.
+    // The handle itself is hidden when the pad is open.
     Rectangle {
         x: 0
         y: root.height / 2 - 44
-        width: root.open || root.hovered ? 28 : 5
+        width: !root.open && root.hovered ? 28 : 5
         height: 88
         radius: 8
-        visible: root.open || root.hovered
-        color: "#282630"
+        visible: !root.open && root.hovered
+        color: root.cardBackground
         border.color: root.accentColor
         border.width: 1
         Text {
             anchors.centerIn: parent
-            text: root.open ? "‹" : "›"
+            text: "›"
             color: root.accentColor
             font.pixelSize: 20
         }
@@ -517,8 +525,9 @@ PanelWindow {
     MouseArea {
         x: 0
         y: root.height / 2 - 44
-        width: root.open || root.hovered ? 28 : 5
+        width: root.hovered ? 28 : 5
         height: 88
+        visible: !root.open
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onEntered: root.hovered = true

@@ -4,8 +4,8 @@ import "../theme"
 Rectangle {
     id: root
 
-    property color panelBg: Qt.rgba(0.08, 0.08, 0.10, 0.88)
-    property color panelBorder: Qt.rgba(0.8, 0.8, 0.85, 0.14)
+    property color panelBg: Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.88)
+    property color panelBorder: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.4)
     property color accentColor: Theme.accent || "#0a84ff"
     property color textColor: Theme.text || "#ffffff"
     property color textMuted: Theme.textMuted || "#8e8e93"

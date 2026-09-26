@@ -9,8 +9,8 @@ Item {
     property string currentTool: "pen"
     property int currentToolSize: 4
     property color currentColor: "#f4f1ed"
-    property color panelBg: Qt.rgba(0.12, 0.12, 0.16, 0.96)
-    property color panelBorder: Qt.rgba(0.8, 0.8, 0.85, 0.14)
+    property color panelBg: Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.96)
+    property color panelBorder: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.4)
     property color accentColor: Theme.accent || "#0a84ff"
     property color textColor: Theme.text || "#ffffff"
     property string iconFamily: "Font Awesome 7 Free, Font Awesome 6 Free, Iosevka Nerd Font"

@@ -5,8 +5,8 @@ Row {
     id: root
 
     property real zoom: 1.0
-    property color panelBg: Qt.rgba(0.08, 0.08, 0.10, 0.88)
-    property color panelBorder: Qt.rgba(0.8, 0.8, 0.85, 0.14)
+    property color panelBg: Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.88)
+    property color panelBorder: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.4)
     property color textColor: Theme.text || "#ffffff"
     property string iconFamily: "Font Awesome 7 Free, Font Awesome 6 Free, Iosevka Nerd Font"
 
