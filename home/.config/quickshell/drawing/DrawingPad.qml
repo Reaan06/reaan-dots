@@ -3,11 +3,8 @@ import QtCore
 import Quickshell
 import Quickshell.Wayland
 
-import "../theme"
-
-// The surface occupies only the left edge; its input region is the handle at
-// rest and the actual drawing card when open. Strokes belong to this instance,
-// not to the Canvas texture (which is discarded when the surface is resized).
+// Strokes are normalized to the drawing surface, so resizing the card does
+// not discard them. The dotted backdrop is separate from the exported Canvas.
 PanelWindow {
     id: root
 
@@ -21,9 +18,13 @@ PanelWindow {
     property string status: ""
     property bool saving: false
 
-    readonly property int cardWidth: Math.min(760, Math.max(260, screen.width - 56))
-    readonly property int cardHeight: Math.min(680, Math.max(260, screen.height - 110))
+    readonly property int cardWidth: Math.min(460, Math.max(1, screen.width - 24))
+    readonly property int cardHeight: Math.min(480, Math.max(1, screen.height - 24))
     readonly property int cardY: Math.round((height - cardHeight) / 2)
+    // Leave the drawing surface and a scrollable row of tools on short screens.
+    readonly property bool compactHeight: cardHeight < 230
+    readonly property color coral: "#e68b83"
+    readonly property color muted: "#b6aebc"
 
     function toggle(): void { open = !open }
 
@@ -83,8 +84,7 @@ PanelWindow {
         }
         saving = true
         status = "Saving…"
-        // Save only the Canvas texture, not its dark background child.
-        // Canvas.save forces any pending painting before writing the PNG.
+        // Save only the Canvas texture, never the dotted backdrop.
         const name = "drawing-" + Qt.formatDateTime(new Date(), "yyyyMMdd-hhmmss-zzz") + ".png"
         const destination = local.replace(/\/$/, "") + "/" + name
         const ok = canvas.save(destination)
@@ -93,7 +93,7 @@ PanelWindow {
     }
 
     anchors { left: true; top: true; bottom: true }
-    implicitWidth: open ? cardWidth + 38 : 38
+    implicitWidth: open ? cardWidth + 16 : 30
     implicitHeight: screen.height
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
@@ -104,148 +104,110 @@ PanelWindow {
 
     mask: Region {
         x: 0
-        y: root.open ? root.cardY : Math.round(root.height / 2 - 40)
-        width: root.open ? root.width : (root.hovered ? 38 : 18)
-        height: root.open ? root.cardHeight : 80
+        y: root.open ? root.cardY : Math.round(root.height / 2 - 44)
+        width: root.open ? root.width : (root.hovered ? 28 : 5)
+        height: root.open ? root.cardHeight : 88
     }
 
     Rectangle {
         id: card
         visible: root.open
-        x: 32
+        x: 14
         y: root.cardY
         width: root.cardWidth
         height: root.cardHeight
         radius: 18
-        color: Theme.island
-        border.color: Theme.islandBorder
+        color: "#242329"
+        border.color: "#504650"
         border.width: 1
+        clip: true
 
         Column {
+            id: layout
             anchors.fill: parent
-            anchors.margins: 14
-            spacing: 10
+            anchors.margins: 12
+            spacing: 8
 
-            Row {
+            Item {
+                visible: !root.compactHeight
+                width: parent.width
                 height: 32
-                spacing: 8
-
-                Repeater {
-                    model: ["Pen", "Eraser", "Undo", "Clear", "Save PNG"]
-                    delegate: Rectangle {
-                        required property string modelData
-                        width: label.implicitWidth + 18
-                        height: 32
-                        radius: 9
-                        color: (modelData === "Pen" && !root.erasing)
-                            || (modelData === "Eraser" && root.erasing)
-                            ? Theme.accent : "#42434b"
-
-                        Text {
-                            id: label
-                            anchors.centerIn: parent
-                            text: modelData
-                            color: "white"
-                            font.pixelSize: 12
-                        }
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                if (modelData === "Pen") root.erasing = false
-                                else if (modelData === "Eraser") root.erasing = true
-                                else if (modelData === "Undo") root.undo()
-                                else if (modelData === "Clear") root.clear()
-                                else root.exportPng()
-                            }
-                        }
-                    }
-                }
-            }
-
-            Row {
-                height: 30
-                spacing: 10
                 Text {
-                    text: "Ink"
-                    color: Theme.text
+                    anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                }
-                Repeater {
-                    model: ["#f4f1ed", "#ff7777", "#ffc45c", "#81d4a0", "#79b9ff", "#be95ed"]
-                    delegate: Rectangle {
-                        required property string modelData
-                        width: 24
-                        height: 24
-                        radius: 12
-                        anchors.verticalCenter: parent.verticalCenter
-                        color: modelData
-                        border.width: Qt.colorEqual(root.ink, modelData) ? 3 : 1
-                        border.color: Qt.colorEqual(root.ink, modelData) ? "white" : "#777777"
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: { root.ink = modelData; root.erasing = false }
-                        }
-                    }
-                }
-                Text {
-                    text: "Size " + root.brushSize
-                    color: Theme.text
-                    anchors.verticalCenter: parent.verticalCenter
+                    text: "DRAWING PAD"
+                    color: root.muted
+                    font.pixelSize: 11
+                    font.bold: true
+                    font.letterSpacing: 2
                 }
                 Rectangle {
+                    anchors.right: parent.right
                     width: 32
-                    height: 28
-                    radius: 8
-                    color: "#42434b"
+                    height: 32
+                    radius: 10
+                    color: "#39363e"
                     Text {
                         anchors.centerIn: parent
-                        text: "−"
-                        color: "white"
+                        text: "×"
+                        color: "#f2d0ca"
+                        font.pixelSize: 20
                     }
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.brushSize = Math.max(1, root.brushSize - 2)
-                    }
-                }
-                Rectangle {
-                    width: 32
-                    height: 28
-                    radius: 8
-                    color: "#42434b"
-                    Text { anchors.centerIn: parent; text: "+"; color: "white" }
-                    MouseArea {
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.brushSize = Math.min(48, root.brushSize + 2)
+                        onClicked: root.open = false
                     }
                 }
             }
 
-            Canvas {
-                id: canvas
+            Item {
+                id: drawingArea
                 width: parent.width
-                height: Math.max(1, parent.height - 32 - 30 - 42)
-                renderTarget: Canvas.Image
-                onWidthChanged: requestPaint()
-                onHeightChanged: requestPaint()
-                onPaint: {
-                    const ctx = getContext("2d")
-                    ctx.clearRect(0, 0, width, height)
-                    for (const stroke of root.strokes)
-                        root.paintStroke(ctx, stroke)
-                    if (root.pending)
-                        root.paintStroke(ctx, root.pending)
-                }
+                height: Math.max(1, layout.height - tools.height - (footer.visible ? footer.height : 0)
+                                 - (root.compactHeight ? (footer.visible ? 2 : 1) : 3) * layout.spacing
+                                 - (root.compactHeight ? 0 : 32))
+                clip: true
 
-                // The exported canvas is transparent: erasing removes ink, not
-                // a painted approximation of the background.
                 Rectangle {
                     anchors.fill: parent
-                    color: "#23252b"
-                    z: -1
+                    radius: 12
+                    color: "#1d1d23"
+                    border.color: "#48414a"
+                    border.width: 1
+                }
+                Canvas {
+                    id: dots
+                    anchors.fill: parent
+                    renderTarget: Canvas.Image
+                    onWidthChanged: requestPaint()
+                    onHeightChanged: requestPaint()
+                    onPaint: {
+                        const ctx = getContext("2d")
+                        ctx.clearRect(0, 0, width, height)
+                        ctx.fillStyle = "#48434e"
+                        for (let x = 12; x < width; x += 18)
+                            for (let y = 12; y < height; y += 18) {
+                                ctx.beginPath()
+                                ctx.arc(x, y, 0.9, 0, 2 * Math.PI)
+                                ctx.fill()
+                            }
+                    }
+                }
+                Canvas {
+                    id: canvas
+                    anchors.fill: parent
+                    renderTarget: Canvas.Image
+                    onWidthChanged: requestPaint()
+                    onHeightChanged: requestPaint()
+                    onPaint: {
+                        const ctx = getContext("2d")
+                        ctx.clearRect(0, 0, width, height)
+                        for (const stroke of root.strokes)
+                            root.paintStroke(ctx, stroke)
+                        if (root.pending)
+                            root.paintStroke(ctx, root.pending)
+                    }
                 }
                 MouseArea {
                     anchors.fill: parent
@@ -272,37 +234,166 @@ PanelWindow {
                     onCanceled: { root.pending = null; canvas.requestPaint() }
                 }
             }
-            Text {
+
+            Rectangle {
+                id: tools
                 width: parent.width
-                height: 22
-                color: Theme.text
+                height: root.compactHeight
+                    ? Math.min(46, Math.max(1, layout.height - (footer.visible ? footer.height : 0)
+                        - (footer.visible ? 2 : 1) * layout.spacing - 24))
+                    : Math.min(toolContents.height + 16,
+                        Math.max(40, layout.height - 32 - footer.height
+                            - 3 * layout.spacing - 80))
+                radius: 12
+                color: "#302c34"
+                border.color: "#504650"
+                clip: true
+
+                Flickable {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    contentHeight: toolContents.height
+                    boundsBehavior: Flickable.StopAtBounds
+                    clip: true
+
+                    Column {
+                        id: toolContents
+                        width: parent.width
+                        spacing: 7
+
+                    Flow {
+                        width: parent.width
+                        spacing: 5
+                        Repeater {
+                            model: ["Pen", "Eraser", "Undo", "Clear", "Save PNG"]
+                            delegate: Rectangle {
+                                required property string modelData
+                                readonly property bool selected: (modelData === "Pen" && !root.erasing)
+                                    || (modelData === "Eraser" && root.erasing)
+                                width: label.implicitWidth + 18
+                                height: 30
+                                radius: 8
+                                color: selected ? "#704b52" : "#403b45"
+                                border.color: selected ? root.coral : "#5b535f"
+                                Text {
+                                    id: label
+                                    anchors.centerIn: parent
+                                    text: modelData
+                                    color: selected ? "#ffe7e0" : "#e9dfe9"
+                                    font.pixelSize: 12
+                                    font.bold: selected
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (modelData === "Pen") root.erasing = false
+                                        else if (modelData === "Eraser") root.erasing = true
+                                        else if (modelData === "Undo") root.undo()
+                                        else if (modelData === "Clear") root.clear()
+                                        else root.exportPng()
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Flow {
+                        width: parent.width
+                        spacing: 6
+                        Repeater {
+                            model: ["#f4f1ed", "#e68b83", "#d1afe2", "#ffc45c", "#81d4a0", "#79b9ff"]
+                            delegate: Rectangle {
+                                required property string modelData
+                                width: 26
+                                height: 26
+                                radius: 13
+                                color: modelData
+                                border.width: Qt.colorEqual(root.ink, modelData) ? 3 : 1
+                                border.color: Qt.colorEqual(root.ink, modelData) ? "white" : "#716b75"
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: { root.ink = modelData; root.erasing = false }
+                                }
+                            }
+                        }
+                        Text {
+                            text: "Size " + root.brushSize
+                            color: "#e9dfe9"
+                            font.pixelSize: 12
+                            height: 26
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                        Repeater {
+                            model: ["−", "+"]
+                            delegate: Rectangle {
+                                required property string modelData
+                                width: 28
+                                height: 26
+                                radius: 7
+                                color: "#403b45"
+                                border.color: "#5b535f"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: modelData
+                                    color: "#f2d0ca"
+                                    font.pixelSize: 16
+                                }
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.brushSize = modelData === "−"
+                                        ? Math.max(1, root.brushSize - 2) : Math.min(48, root.brushSize + 2)
+                                }
+                            }
+                        }
+                    }
+                    }
+                }
+            }
+
+            Text {
+                id: footer
+                visible: !root.compactHeight || root.status !== ""
+                width: parent.width
+                height: 16
+                color: root.muted
                 elide: Text.ElideRight
                 text: root.status || "Draw on the canvas · Super+D to hide"
-                font.pixelSize: 12
+                font.pixelSize: 11
             }
         }
     }
 
+    // The closed window has no painted pixels. Only five edge pixels capture
+    // hover; expanding the mask with the handle lets the pointer click it.
     Rectangle {
         x: 0
-        y: root.height / 2 - 40
-        width: root.hovered || root.open ? 32 : 14
-        height: 80
-        radius: 7
-        color: Theme.accent
+        y: root.height / 2 - 44
+        width: root.open || root.hovered ? 28 : 5
+        height: 88
+        radius: 8
+        visible: root.open || root.hovered
+        color: "#383139"
+        border.color: root.coral
+        border.width: 1
         Text {
             anchors.centerIn: parent
             text: root.open ? "‹" : "›"
-            color: "white"
-            font.pixelSize: 22
+            color: "#f2b1a9"
+            font.pixelSize: 20
         }
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onEntered: root.hovered = true
-            onExited: root.hovered = false
-            onClicked: root.toggle()
-        }
+    }
+    MouseArea {
+        x: 0
+        y: root.height / 2 - 44
+        width: root.open || root.hovered ? 28 : 5
+        height: 88
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        onEntered: root.hovered = true
+        onExited: root.hovered = false
+        onClicked: root.toggle()
     }
 }
