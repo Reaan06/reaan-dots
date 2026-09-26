@@ -203,6 +203,7 @@ bind(mainMod .. " + SHIFT + P", hl.dsp.global("quickshell:pet"),        { descri
 bind(mainMod .. " + G",         hl.dsp.global("quickshell:games"),      { description = "Shell · Open the games" })
 bind(mainMod .. " + S",         hl.dsp.global("quickshell:notes"),      { description = "Shell · Open the notes" })
 bind(mainMod .. " + K",         hl.dsp.global("quickshell:board"),      { description = "Shell · Open the task board" })
+bind(mainMod .. " + D",         hl.dsp.global("quickshell:drawingPad"), { description = "Shell · Toggle the drawing pad" })
 
 -- · key sheet, read from `hyprctl binds`. H, since / is SHIFT + 7 on a
 -- · Spanish layout

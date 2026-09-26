@@ -16,6 +16,7 @@ import "./bar"
 import "./capture"
 import "./desktop"
 import "./dock"
+import "./drawing"
 import "./lock"
 import "./services"
 import "./settings"
@@ -142,6 +143,34 @@ ShellRoot {
             required property var modelData
 
             screen: modelData
+        }
+    }
+
+    // One drawing surface follows the primary display across hotplug. Its
+    // strokes remain in the shell root while the output window is rebuilt.
+    property var drawingStrokes: []
+    property bool drawingOpen: false
+
+    Variants {
+        id: drawingPads
+        model: root.primaryScreens
+
+        DrawingPad {
+            required property var modelData
+            screen: modelData
+            open: root.drawingOpen
+            strokes: root.drawingStrokes
+            onOpenChanged: root.drawingOpen = open
+            onStrokesChanged: root.drawingStrokes = strokes
+        }
+    }
+
+    GlobalShortcut {
+        name: "drawingPad"
+        description: "Toggle the drawing pad"
+        onPressed: {
+            const pad = drawingPads.instances[0]
+            if (pad) pad.toggle()
         }
     }
 
